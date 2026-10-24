@@ -1,0 +1,62 @@
+Archive: Largefire.tar.gz
+GeoPackage files found: 10
+  Largefire\LargeFires_2012-2020.gpkg
+  Largefire\LargeFires_2012.gpkg
+  Largefire\LargeFires_2013.gpkg
+  Largefire\LargeFires_2014.gpkg
+  Largefire\LargeFires_2015.gpkg
+  Largefire\LargeFires_2016.gpkg
+  Largefire\LargeFires_2017.gpkg
+  Largefire\LargeFires_2018.gpkg
+  Largefire\LargeFires_2019.gpkg
+  Largefire\LargeFires_2020.gpkg
+
+=== LargeFires_2012-2020.gpkg: 3 layer(s) ===
+
+--- layer: perimeter | geometry: Unknown | rows: 12801 ---
+CRS: EPSG:4326
+  time                           object  e.g. 2012-11-06T12:00:00
+  clat                           float64  e.g. 36.77744830528348
+  clon                           float64  e.g. -121.55308101246403
+  ftype                          int64  e.g. 3
+  n_pixels                       int64  e.g. 22
+  n_newpixels                    int64  e.g. 22
+  farea                          float64  e.g. 3.324398114268457
+  fperim                         float64  e.g. 0.07035815662351697
+  flinelen                       float64  e.g. 0.07035815662351697
+  duration                       float64  e.g. 0.5
+  pixden                         float64  e.g. 6.617739285067896
+  meanFRP                        float64  e.g. 55.89318181818182
+  year                           int64  e.g. 2012
+  tst_month                      int64  e.g. 11
+  tst_day                        int64  e.g. 6
+  tst_ampm                       object  e.g. PM
+  ted_year                       int64  e.g. 2012
+  ted_month                      int64  e.g. 11
+  ted_day                        int64  e.g. 6
+  ted_ampm                       object  e.g. PM
+  fireID                         int64  e.g. 2631
+  geometry                       geometry
+
+--- layer: fireline | geometry: Unknown | rows: 12801 ---
+CRS: EPSG:4326
+  time                           object  e.g. 2012-11-06T12:00:00
+  fireID                         int64  e.g. 2631
+  year                           int64  e.g. 2012
+  geometry                       geometry
+
+--- layer: newfirepix | geometry: MultiPoint | rows: 12801 ---
+CRS: EPSG:4326
+  time                           object  e.g. 2012-11-06T12:00:00
+  fireID                         int64  e.g. 2631
+  year                           int64  e.g. 2012
+  geometry                       geometry
+LargeFires_2012.gpkg: 3 layer(s)
+LargeFires_2013.gpkg: 3 layer(s)
+LargeFires_2014.gpkg: 3 layer(s)
+LargeFires_2015.gpkg: 3 layer(s)
+LargeFires_2016.gpkg: 3 layer(s)
+LargeFires_2017.gpkg: 3 layer(s)
+LargeFires_2018.gpkg: 3 layer(s)
+LargeFires_2019.gpkg: 3 layer(s)
+LargeFires_2020.gpkg: 3 layer(s)

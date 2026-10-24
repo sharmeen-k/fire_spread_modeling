@@ -1,0 +1,6 @@
+.venv/
+data/
+*.gpkg
+*.tar.gz
+Tonight_Milestone_Checklist.pdf
+Wildfire_Capstone_5-Week_Strategy.pdf
