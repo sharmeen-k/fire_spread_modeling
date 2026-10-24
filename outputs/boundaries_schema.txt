@@ -1,0 +1,71 @@
+
+##### counties: ['CA_Counties.shp']
+
+--- CA_Counties.shp | layer: CA_Counties | geometry: Polygon | rows: 58 ---
+CRS: EPSG:3857
+  STATEFP                        object  e.g. 06
+  COUNTYFP                       object  e.g. 091
+  COUNTYNS                       object  e.g. 00277310
+  GEOID                          object  e.g. 06091
+  NAME                           object  e.g. Sierra
+  NAMELSAD                       object  e.g. Sierra County
+  LSAD                           object  e.g. 06
+  CLASSFP                        object  e.g. H1
+  MTFCC                          object  e.g. G4020
+  CSAFP                          object  e.g. None
+  CBSAFP                         object  e.g. None
+  METDIVFP                       object  e.g. None
+  FUNCSTAT                       object  e.g. A
+  ALAND                          float64  e.g. 2468694583.0
+  AWATER                         float64  e.g. 23299110.0
+  INTPTLAT                       object  e.g. +39.5769252
+  INTPTLON                       object  e.g. -120.5219926
+  Shape_Leng                     float64  e.g. 375602.758281
+  Shape_Area                     float64  e.g. 4200449582.9
+  geometry                       geometry
+
+##### frap: ['fire25_1.gdb']
+
+--- fire25_1.gdb | layer: firep25_1 | geometry: MultiPolygon | rows: 23334 ---
+CRS: EPSG:3310
+  YEAR_                          int16  e.g. 2025
+  STATE                          object  e.g. CA
+  AGENCY                         object  e.g. USF
+  UNIT_ID                        object  e.g. LPF
+  FIRE_NAME                      object  e.g. GIFFORD
+  INC_NUM                        object  e.g. 00002181
+  IRWINID                        object  e.g. {08A6358F-8301-4093-9988-E265C8F6F0A9}
+  ALARM_DATE                     datetime64[ms, UTC]  e.g. 2025-08-01 00:00:00+00:00
+  CONT_DATE                      datetime64[ms, UTC]  e.g. 2025-10-14 00:00:00+00:00
+  C_METHOD                       int16  e.g. 3
+  CAUSE                          int16  e.g. 14
+  OBJECTIVE                      int16  e.g. 1
+  GIS_ACRES                      float32  e.g. 131613.53125
+  COMPLEX_ID                     object  e.g. None
+  COMPLEX_NAME                   object  e.g. None
+  COMMENTS                       object  e.g. None
+  FIRE_NUM                       object  e.g. None
+  Shape_Length                   float64  e.g. 257388.32037937763
+  Shape_Area                     float64  e.g. 532621062.18074936
+  GlobalID                       object  e.g. {E87207FF-BD3D-4836-8A89-AD218A20B17E}
+  geometry                       geometry
+
+--- fire25_1.gdb | layer: rxburn25_1 | geometry: MultiPolygon | rows: 11975 ---
+CRS: EPSG:3310
+  YEAR_                          int16  e.g. 2025
+  STATE                          object  e.g. CA
+  AGENCY                         object  e.g. BLM
+  UNIT_ID                        object  e.g. CND
+  TREATMENT_ID                   object  e.g. 38441
+  TREATMENT_NAME                 object  e.g. BIL312D Stornetta Rx_FY25
+  TREATMENT_TYPE                 int16  e.g. 3
+  START_DATE                     datetime64[ms, UTC]  e.g. 2024-10-01 00:00:00+00:00
+  END_DATE                       datetime64[ms, UTC]  e.g. 2025-02-01 00:00:00+00:00
+  TREATED_AC                     float64  e.g. 15.0
+  GIS_ACRES                      float32  e.g. 14.621698379516602
+  RX_CONSUM                      int16  e.g. 3
+  PRE_CON_CLASS                  float64  e.g. nan
+  POST_CON_CLASS                 float64  e.g. nan
+  Shape_Length                   float64  e.g. 1104.32397914691
+  Shape_Area                     float64  e.g. 59171.91379751348
+  geometry                       geometry
