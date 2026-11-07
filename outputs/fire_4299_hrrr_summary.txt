@@ -1,0 +1,21 @@
+fireID 4299: 50 records
+  label 2017-12-05 00:00:00  -> obs 2017-12-05 09:26:33.127917054+00:00
+  label 2017-12-29 12:00:00 -> obs 2017-12-29 21:27:10.669789674+00:00
+  gap between consecutive obs (h): min 12.00, max 12.00
+HRRR window 2017-12-04 09:00:00+00:00 -> 2017-12-04 11:00:00+00:00 (3 hours), box W -119.856 S 34.118 E -118.754 N 34.801
+Hours ok: 3/3  (downloaded 3, cached 0)
+
+Rotation: LoV 262.5, Latin1 38.5 -> angle -14.0 to -13.1 deg over the box (would be the direction error if ignored)
+Crop: 33 x 39 HRRR cells (~3 km)
+  wspd10  min     0.0  max    15.1  mean     3.5  NaN 0.0%
+  gust    min     0.0  max    18.7  mean     4.9  NaN 0.0%
+  wdir10  min     0.1  max   360.0  mean   159.2  NaN 0.0%
+  rh2     min    14.6  max   100.0  mean    50.3  NaN 0.0%
+  t2m_c   min    -3.5  max    18.2  mean     8.8  NaN 0.0%
+
+Ignition-area cell (34.385, -119.128):
+  hours with N-E wind >= 5 m/s and RH <= 25%: 0 of 3 (rough Santa Ana preview, not the final label)
+  first 48 h: max wind 3.9 m/s, max gust 4.2 m/s, min RH 27%
+
+Wrote data\processed\fires\4299\hrrr_hourly.nc, data\processed\fires\4299\obs_times.csv
+Wrote outputs\fire_4299_hrrr_timeseries.png

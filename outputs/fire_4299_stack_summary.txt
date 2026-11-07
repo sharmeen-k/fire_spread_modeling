@@ -1,0 +1,33 @@
+fireID 4299: 50 records from layer 'perimeter', 2017-12-05 00:00:00+00:00 -> 2017-12-29 12:00:00+00:00
+Grid EPSG:32611 @ 30 m: 2725 x 1725 cells, bounds [247500.0, 3789750.0, 329250.0, 3841500.0]
+LANDFIRE download box (WGS84, already padded 0.01 deg): W -119.7662  S 34.2082  E -118.8440  N 34.7113
+
+DEM: using cached dem.tif
+dem (m)        min     -1.12  max   2285.89  mean    685.36  nodata  0.00%
+slope (deg)    min      0.00  max     69.23  mean     15.64  nodata  0.00%
+aspect (deg)   min      0.00  max    360.00  mean    182.42  nodata 15.69%
+
+Perimeters on grid:
+  first record area     204.35 km2
+  last record area     1262.92 km2   (farea last = 1265.32, farea max = 1265.32)
+  union of records     1262.92 km2
+  IoU(last, union) = 1.000   (~1.0 means perimeters are cumulative)
+  farea monotonic non-decreasing: True
+
+LANDFIRE dir: C:\fire_spread_modelling\data\raw\landfire\LF2016_Remap
+  fbfm40  <- LF2016_FBFM40_CONUS.tif  src CRS EPSG:5070  dtype int16  nodata 32767.0  res [30.0, 30.0]
+  fbfm40         min     91.00  max    189.00  mean    118.07  nodata  9.73%
+  cc      <- LF2016_CC_CONUS.tif  src CRS EPSG:5070  dtype int16  nodata 32767.0  res [30.0, 30.0]
+  cc             min      0.00  max     75.00  mean      9.61  nodata  9.73%
+  ch      <- LF2016_CH_CONUS.tif  src CRS EPSG:5070  dtype int16  nodata 32767.0  res [30.0, 30.0]
+  ch             min      0.00  max    510.00  mean     52.83  nodata  9.73%
+  cbh     <- LF2016_CBH_CONUS.tif  src CRS EPSG:5070  dtype int16  nodata 32767.0  res [30.0, 30.0]
+  cbh            min      0.00  max    100.00  mean     15.20  nodata  9.73%
+  cbd     <- LF2016_CBD_CONUS.tif  src CRS EPSG:5070  dtype int16  nodata 32767.0  res [30.0, 30.0]
+  cbd            min      0.00  max     38.00  mean      0.99  nodata  9.73%
+  FBFM40 inside burned union (top 10 codes): 122:60.0%, 102:14.1%, 184:6.6%, 91:4.3%, 147:3.3%, 187:2.9%, 121:2.1%, 186:1.4%, 183:1.4%, 165:1.1%
+  non-burnable fraction inside burned area: 5.7%
+  NOTE: LANDFIRE stores CH and CBH as m*10 and CBD as kg/m3*100; confirm in the product metadata before using them in Rothermel.
+
+Wrote rasters to data\processed\fires\4299
+Wrote outputs\fire_4299_alignment.png
