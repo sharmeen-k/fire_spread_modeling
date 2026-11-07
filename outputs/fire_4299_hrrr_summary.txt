@@ -2,20 +2,38 @@ fireID 4299: 50 records
   label 2017-12-05 00:00:00  -> obs 2017-12-05 09:26:33.127917054+00:00
   label 2017-12-29 12:00:00 -> obs 2017-12-29 21:27:10.669789674+00:00
   gap between consecutive obs (h): min 12.00, max 12.00
-HRRR window 2017-12-04 09:00:00+00:00 -> 2017-12-04 11:00:00+00:00 (3 hours), box W -119.856 S 34.118 E -118.754 N 34.801
-Hours ok: 3/3  (downloaded 3, cached 0)
+HRRR window 2017-12-04 09:00:00+00:00 -> 2017-12-29 23:00:00+00:00 (615 hours), box W -119.856 S 34.118 E -118.754 N 34.801
+Hours ok: 599/615  (downloaded 452, cached 147)
+Hours missing/failed (16):
+  2017-12-07 01Z  missing
+  2017-12-08 07Z  missing
+  2017-12-10 08Z  error: fields missing ['u10', 'v10', 'rh2']
+  2017-12-11 14Z  missing
+  2017-12-13 08Z  missing
+  2017-12-14 04Z  missing
+  2017-12-14 22Z  missing
+  2017-12-15 03Z  missing
+  2017-12-15 07Z  missing
+  2017-12-16 00Z  missing
+  2017-12-16 12Z  missing
+  2017-12-23 12Z  missing
+  2017-12-24 17Z  missing
+  2017-12-25 18Z  missing
+  2017-12-27 16Z  missing
+  2017-12-29 18Z  missing
+  Re-run the script to retry failed hours (cached hours are skipped).
 
 Rotation: LoV 262.5, Latin1 38.5 -> angle -14.0 to -13.1 deg over the box (would be the direction error if ignored)
 Crop: 33 x 39 HRRR cells (~3 km)
-  wspd10  min     0.0  max    15.1  mean     3.5  NaN 0.0%
-  gust    min     0.0  max    18.7  mean     4.9  NaN 0.0%
-  wdir10  min     0.1  max   360.0  mean   159.2  NaN 0.0%
-  rh2     min    14.6  max   100.0  mean    50.3  NaN 0.0%
-  t2m_c   min    -3.5  max    18.2  mean     8.8  NaN 0.0%
+  wspd10  min     0.0  max    27.2  mean     3.9  NaN 0.0%
+  gust    min     0.0  max    36.8  mean     5.4  NaN 0.0%
+  wdir10  min     0.0  max   360.0  mean   154.1  NaN 0.0%
+  rh2     min     1.0  max   100.0  mean    34.0  NaN 0.0%
+  t2m_c   min    -8.0  max    30.0  mean    13.2  NaN 0.0%
 
 Ignition-area cell (34.385, -119.128):
-  hours with N-E wind >= 5 m/s and RH <= 25%: 0 of 3 (rough Santa Ana preview, not the final label)
-  first 48 h: max wind 3.9 m/s, max gust 4.2 m/s, min RH 27%
+  hours with N-E wind >= 5 m/s and RH <= 25%: 100 of 599 (rough Santa Ana preview, not the final label)
+  first 48 h: max wind 11.2 m/s, max gust 19.5 m/s, min RH 4%
 
 Wrote data\processed\fires\4299\hrrr_hourly.nc, data\processed\fires\4299\obs_times.csv
 Wrote outputs\fire_4299_hrrr_timeseries.png
