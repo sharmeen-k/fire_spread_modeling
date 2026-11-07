@@ -7,7 +7,7 @@ import pyogrio
 
 TEST = {4299: "Thomas 2017", 3922: "Woolsey 2018"}
 N_VAL, SEED = 3, 42
-HRRR_START = pd.Timestamp("2014-07-01")   # keep in sync with 03; verify the real date
+HRRR_START = pd.Timestamp("2014-09-30")   # keep in sync with 03; verify the real date
 MAX_DAYS = 60                              # drop multi-year merged objects
 MIN_RECORDS = 2                            # need >= 2 records for one 12-hour sample
 MIN_RECORDS_VAL, MIN_AREA_VAL = 6, 20      # validation fires: enough steps, km2

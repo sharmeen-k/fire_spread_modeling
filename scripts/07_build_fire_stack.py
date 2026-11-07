@@ -208,6 +208,7 @@ def landfire_to_grid(path, grid):
                   src_nodata=src.nodata if src.nodata is not None else LF_NODATA,
                   dst_transform=grid["transform"], dst_crs=CRS,
                   dst_nodata=LF_NODATA, resampling=Resampling.nearest)
+    out[out < 0] = LF_NODATA   # LANDFIRE fill values (e.g. -10000 over ocean) are not valid codes
     return out, info
 
 
