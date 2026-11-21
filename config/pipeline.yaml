@@ -54,7 +54,7 @@ stations:
   offshore: {dir_min: 0.0, dir_max: 110.0, wspd_min: 5.0, rh_max: 25.0, cell_fraction: 0.20}
 
 fuel_moisture:
-  spinup_days: 7.0           # weather (and Nelson) start this long before the analysis period
+  spinup_days: 30.0           # weather (and Nelson) start this long before the analysis period
   classes: [1, 10, 100, 1000]
   afternoon_utc_hour: 21     # ~13:00 PST, the time of day gridMET/NFDRS values represent
   gridmet_urls:
