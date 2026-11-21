@@ -1,0 +1,6 @@
+outs:
+- md5: e9f62fbeb5f413d52d0ba6cbb9289b85.dir
+  size: 144422855
+  nfiles: 60
+  hash: md5
+  path: landfire

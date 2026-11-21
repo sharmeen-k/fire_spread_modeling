@@ -1,0 +1,5 @@
+outs:
+- md5: fdb5f5130194b2d12e544d9672a1a43c
+  size: 98667168
+  hash: md5
+  path: Largefire.tar.gz

@@ -1,0 +1,70 @@
+HRRR vs surface stations, fire 4299
+==================================================
+HRRR file contents:
+  u10_grid     ('time', 'y', 'x')                  m/s grid-relative
+  v10_grid     ('time', 'y', 'x')                  m/s grid-relative
+  t2m          ('time', 'y', 'x')                  K
+  rh2          ('time', 'y', 'x')                  %
+  gust         ('time', 'y', 'x')                  m/s
+  u10_earth    ('time', 'y', 'x')                  m/s eastward
+  v10_earth    ('time', 'y', 'x')                  m/s northward
+  wspd10       ('time', 'y', 'x')                  m/s
+  wdir10       ('time', 'y', 'x')                  deg, direction wind blows FROM
+  t2m_c        ('time', 'y', 'x')                  degC
+  time axis 'time': 599 hours, 2017-12-04 09:00:00 to 2017-12-29 23:00:00 UTC
+  grid (33, 39), lat 33.918..34.996, lon -120.045..-118.594
+  using: u=u10_earth, v=v10_earth, wspd=wspd10, wdir=wdir10, gust=gust, rh=rh2, t2m_c=t2m_c, t2m_k=t2m
+
+Period 2017-12-04 08:00:00 to 2017-12-30 00:00:00 UTC; station box (-120.015, 33.948, -118.624, 34.966)
+Offshore hours (>= 20% of HRRR cells with wind from 0-110 deg, >= 5.0 m/s, RH <= 25.0%): 182 of 599
+Bias = HRRR - station. Wind direction compared only when both speeds >= 2.0 m/s.
+
+Stations
+--------------------------------------------------
+network stid               name   lat     lon  elev_m  dem_elev_m  rel_elev_3km_m terrain_src  in_model_grid  hrrr_dist_km  n_hours
+   ASOS  CMA   CAMARILLO (AWOS) 34.21 -119.09   23.00       20.61           -4.38        3dep          False          1.90      507
+   ASOS  NTD       PT MUGU NAWS 34.12 -119.12    2.00        3.04            0.51        3dep          False          1.15      591
+   ASOS  OXR             OXNARD 34.20 -119.21   13.00       11.07           -0.03        3dep          False          0.24      599
+   ASOS  SBA SANTA BARBARA MUNI 34.43 -119.84    3.00        2.94           -3.44        3dep          False          0.93      599
+
+Network totals (all hours)
+--------------------------------------------------
+network variable units    n  obs_mean  hrrr_mean  bias   mae  rmse    r
+   ASOS     wspd   m/s 2296      3.53       2.82 -0.71  1.62  2.17 0.80
+   ASOS     gust   m/s  321     14.46      11.23 -3.23  3.67  4.55 0.64
+   ASOS     wdir   deg 1032       NaN        NaN  1.63 22.62 34.05  NaN
+   ASOS       rh     % 2298     42.89      39.74 -3.15 11.31 15.64 0.82
+   ASOS      t2m     C 2298     14.30      14.11 -0.19  2.44  3.44 0.84
+
+Network totals by regime: wind speed and RH
+--------------------------------------------------
+network   regime variable    n  bias  rmse
+   ASOS      all     wspd 2296 -0.71  2.17
+   ASOS      all     gust  321 -3.23  4.55
+   ASOS      all       rh 2298 -3.15 15.64
+   ASOS offshore     wspd  721 -1.68  2.97
+   ASOS offshore     gust  277 -3.13  4.49
+   ASOS offshore       rh  722 -2.68 15.41
+   ASOS    other     wspd 1575 -0.27  1.68
+   ASOS    other     gust   44 -3.82  4.92
+   ASOS    other       rh 1576 -3.37 15.74
+
+Wind speed by station, with terrain position
+--------------------------------------------------
+network stid  dem_elev_m  rel_elev_3km_m   n  obs_mean  hrrr_mean  bias  rmse
+   ASOS  NTD        3.04            0.51 591      4.48       4.20 -0.27  1.66
+   ASOS  OXR       11.07           -0.03 599      3.75       2.34 -1.41  2.35
+   ASOS  SBA        2.94           -3.44 599      1.22       1.49  0.27  1.48
+   ASOS  CMA       20.61           -4.38 507      4.91       3.35 -1.56  3.02
+
+Correlation of station wind bias with relative elevation (n=4 stations): r = 0.05
+Negative r means HRRR under-predicts wind more at ridge-like stations.
+
+Notes
+- ASOS: 10 m, 2-min mean wind; gusts reported only when gusty, so gust stats
+  cover gusty hours only. RAWS: ~6.1 m (20 ft), 10-min mean wind, hourly peak gust.
+  RAWS winds are therefore expected to read lower than a true 10 m wind.
+- HRRR value is the nearest 3 km cell (no interpolation).
+- rel_elev_3km_m = station DEM height minus the mean DEM height in a 3 km
+  window (~one HRRR cell); > 0 ridge-like, < 0 valley-like.
+  terrain_src: grid = fire-grid DEM (script 07); 3dep = window fetched from USGS 3DEP.

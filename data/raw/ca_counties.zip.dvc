@@ -1,0 +1,5 @@
+outs:
+- md5: 76d52888e20ff168c053da3e8525668c
+  size: 2597712
+  hash: md5
+  path: ca_counties.zip
