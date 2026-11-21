@@ -93,9 +93,11 @@ def _herbie(init: pd.Timestamp, fxx: int, cfg: Config, tmp: Path):
 class HrrrCache:
     """Per-hour crops of HRRR fields, cached as NetCDF under data/raw/hrrr/<id>/."""
 
-    def __init__(self, cfg: Config, fire_id: int, box, retry_missing: bool = False):
+    def __init__(self, cfg: Config, fire_id: int, box, retry_missing: bool = False, record: bool = True):
         self.cfg, self.fire_id, self.box = cfg, fire_id, box
         self.retry_missing = retry_missing
+        self.record = record  # worker processes leave manifest writing to the parent
+        self.last_url = ""
         self.dir = cache_dir(cfg, fire_id)
         self.tmp = cfg.raw_dir / "hrrr" / "_tmp"
         (self.dir / "f01").mkdir(parents=True, exist_ok=True)
@@ -117,6 +119,9 @@ class HrrrCache:
             attrs=attrs or {},
         )
         ds.to_netcdf(path)
+        self.last_url = str(url)
+        if not self.record:
+            return
         manifest.record(
             self.cfg.data_dir,
             source="NOAA HRRR (Herbie)",
@@ -201,11 +206,91 @@ class HrrrCache:
                     f,
                     getattr(H, "grib", ""),
                 )
+                if not self.record:  # _save() already recorded it otherwise
+                    manifest.record(
+                        self.cfg.data_dir,
+                        source="NOAA HRRR (Herbie)",
+                        url=self.last_url,
+                        path=f,
+                        step="weather",
+                        fire_id=self.fire_id,
+                    )
             except Exception as exc:
                 log.warning("Land mask not available (%s); all cells treated as land", str(exc)[:120])
                 return None
         with xr.open_dataset(f) as d:
             return (d["land"].values > 0.5).astype("int8")
+
+
+# ------------------------------------------------------------------ download
+def _fetch_task(cfg: Config, fire_id: int, box, retry_missing: bool, kind: str, t: pd.Timestamp):
+    """Runs in a worker process: fetch one field set for one hour."""
+    c = HrrrCache(cfg, fire_id, box, retry_missing=retry_missing, record=False)
+    f, st = c.get(kind, t)
+    return kind, t, f, st, c.last_url
+
+
+def download(cfg: Config, fire_id: int, box, cache: HrrrCache, hours, retry_missing: bool):
+    """Fetch every (kind, hour) not yet cached, in parallel processes (cfg.hrrr.workers)."""
+    got = {"f00": {}, "f01": {}}
+    status = {"f00": {}, "f01": {}}
+    todo = []
+    for t in hours:
+        for kind in ("f00", "f01"):
+            f = cache.path(kind, t)
+            if f.exists():
+                got[kind][t], status[kind][t] = f, "cached"
+            elif f.with_suffix(".missing").exists() and not retry_missing:
+                status[kind][t] = "missing (known)"
+            else:
+                todo.append((kind, t))
+    log.info(
+        "HRRR: %d field sets cached, %d to fetch with %d worker(s)",
+        sum(map(len, got.values())),
+        len(todo),
+        cfg.hrrr.workers,
+    )
+
+    def done(kind, t, f, st, url, n):
+        status[kind][t] = st
+        if f is not None:
+            got[kind][t] = Path(f)
+            if st == "downloaded":
+                manifest.record(
+                    cfg.data_dir,
+                    source="NOAA HRRR (Herbie)",
+                    url=url,
+                    path=Path(f),
+                    step="weather",
+                    fire_id=fire_id,
+                )
+        elif st != "missing (known)":
+            log.info("  %s %s %s", kind, f"{t:%Y-%m-%d %H}Z", st)
+        if n % 48 == 0 or n == len(todo):
+            log.info("  %d/%d fetched", n, len(todo))
+
+    # the first task of each kind runs here, so its GRIB inventory is logged
+    n = 0
+    for kind in ("f00", "f01"):
+        first = next((x for x in todo if x[0] == kind), None)
+        if first:
+            todo.remove(first)
+            todo.insert(0, first)
+    serial = todo if cfg.hrrr.workers == 1 else todo[:2]
+    for kind, t in serial:
+        f, st = cache.get(kind, t)
+        n += 1
+        done(kind, t, f, st, cache.last_url, n)
+    rest = todo[len(serial) :]
+    if rest:
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+
+        with ProcessPoolExecutor(max_workers=cfg.hrrr.workers) as pool:
+            futs = [pool.submit(_fetch_task, cfg, fire_id, box, retry_missing, kind, t) for kind, t in rest]
+            for fut in as_completed(futs):
+                n += 1
+                done(*fut.result(), n)
+    return got, status
 
 
 # ------------------------------------------------------------------ assemble
@@ -289,19 +374,8 @@ def run(cfg: Config, fire_id: int, max_hours: int | None = None, retry_missing: 
     )
     rep(f"Box W {box[0]:.3f} S {box[1]:.3f} E {box[2]:.3f} N {box[3]:.3f}")
 
-    cache = HrrrCache(cfg, fire_id, box, retry_missing=retry_missing)
-    got = {"f00": {}, "f01": {}}
-    status = {"f00": {}, "f01": {}}
-    for k, t in enumerate(hours, 1):
-        for kind in ("f00", "f01"):
-            f, st = cache.get(kind, t)
-            status[kind][t] = st
-            if f is not None:
-                got[kind][t] = f
-            elif st != "missing (known)":
-                log_.info("  %s %s %s", kind, f"{t:%Y-%m-%d %H}Z", st)
-        if k % 24 == 0 or k == len(hours):
-            log_.info("  %d/%d hours", k, len(hours))
+    cache = HrrrCache(cfg, fire_id, box, retry_missing=retry_missing, record=False)  # download() records
+    got, status = download(cfg, fire_id, box, cache, hours, retry_missing)
     for kind in ("f00", "f01"):
         st = status[kind].values()
         rep(

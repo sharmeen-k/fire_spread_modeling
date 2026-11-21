@@ -44,3 +44,28 @@ def test_nelson_dries_under_santa_ana_and_wets_with_rain():
     RH_wet[48:60] = 0.95
     wet, _ = run_nelson(nfdrs4, 1, T, RH_wet, SW, P_wet, 0.15)
     assert wet[54] > fm1[54] + 10.0
+
+
+def test_live_fuel_moisture_daily_api():
+    """NFDRS4.Init + UpdateDaily, as live_fuel_moisture.run_cell calls them, give values within NFDRS limits."""
+    import pandas as pd
+
+    from firespread.live_fuel_moisture import run_cell
+
+    days = pd.date_range("2016-12-01", "2017-12-10", freq="D")
+    doy = days.day_of_year.to_numpy()
+    season = np.cos(2 * np.pi * (doy - 15) / 365.25)  # wet winter, dry autumn
+    d = {
+        "tmmx": 296.0 - 6 * season,
+        "tmmn": 283.0 - 5 * season,
+        "rmin": 30.0 + 15 * season,
+        "pr": np.where(season > 0.5, 3.0, 0.0),
+        "vs": np.full(len(days), 3.0),
+        "fm100": 10.0 + 3 * season,
+        "fm1000": 12.0 + 3 * season,
+    }
+    herb, wood, gsi = run_cell(nfdrs4, 34.4, days, d, herbs_annual=True)
+    assert np.isfinite(herb).all() and np.isfinite(wood).all() and np.isfinite(gsi).all()
+    assert herb.min() >= 30 - 1e-6 and herb.max() <= 250 + 1e-6
+    assert wood.min() >= 60 - 1e-6 and wood.max() <= 200 + 1e-6
+    assert gsi.min() >= 0 and gsi.max() <= 1

@@ -167,8 +167,46 @@ class FakeDeadFuelMoisture:
         return self.w
 
 
+class FakeNFDRS4:
+    """Same daily calls as nfdrs4.NFDRS4; simple seasonal response."""
+
+    def __init__(self):
+        self.MCHERB, self.MCWOOD, self.m_GSI, self.inited = 30.0, 60.0, 0.0, False
+
+    def Init(self, lat, fuel_model, slope_class, avg_precip, lt, cure, is_annual, kbdi, reg_hour, reinit):
+        assert isinstance(fuel_model, str) and len(fuel_model) == 1 and -90 <= lat <= 90
+        self.inited = True
+
+    def UpdateDaily(
+        self,
+        year,
+        month,
+        day,
+        julian,
+        temp,
+        min_temp,
+        max_temp,
+        rh,
+        min_rh,
+        pcp24,
+        ws,
+        mc1,
+        mc10,
+        mc100,
+        mc1000,
+        fuel_temp,
+        snow,
+    ):
+        assert self.inited and min_temp <= max_temp and 0 <= rh <= 100 and pcp24 >= 0
+        target = min(1.0, max(0.0, (rh - 10.0) / 50.0))
+        self.m_GSI += (target - self.m_GSI) / 21.0
+        self.MCHERB = 30.0 + 220.0 * self.m_GSI
+        self.MCWOOD = 60.0 + 140.0 * self.m_GSI
+
+
 nfdrs4_module = types.ModuleType("nfdrs4")
 nfdrs4_module.DeadFuelMoisture = FakeDeadFuelMoisture
+nfdrs4_module.NFDRS4 = FakeNFDRS4
 nfdrs4_module.__version__ = "fake"
 
 
@@ -271,13 +309,29 @@ def _synoptic(params):
     return json.dumps({"SUMMARY": {"RESPONSE_CODE": 1}, "STATION": st}).encode()
 
 
-def _gridmet(params, var):
+GRIDMET_FAKE = {  # file key -> (variable name, mean, seasonal amplitude)
+    "fm100": ("dead_fuel_moisture_100hr", 7.0, 2.0),
+    "fm1000": ("dead_fuel_moisture_1000hr", 10.0, 2.0),
+    "tmmx": ("air_temperature", 296.0, 6.0),
+    "tmmn": ("air_temperature", 283.0, 5.0),
+    "rmax": ("relative_humidity", 75.0, 10.0),
+    "rmin": ("relative_humidity", 30.0, 15.0),
+    "pr": ("precipitation_amount", 1.0, 1.0),
+    "vs": ("wind_speed", 3.0, 1.0),
+}
+
+
+def _gridmet(params, key):
     year = int(params["time_start"][:4])
     days = pd.date_range(f"{year}-01-01", f"{year}-12-31")
     lat = np.arange(params["north"], params["south"], -1 / 24)
     lon = np.arange(params["west"], params["east"], 1 / 24)
-    base = 7.0 if "100hr" in var else 10.0
-    v = base + 2 * np.sin(np.arange(len(days)) / 30)[:, None, None] + 0 * lat[None, :, None] + 0 * lon
+    var, base, amp = GRIDMET_FAKE[key]
+    season = np.cos(2 * np.pi * (days.day_of_year.to_numpy() - 15) / 365.25)  # wet winter, dry autumn
+    sign = -1.0 if key in ("tmmx", "tmmn") else 1.0
+    v = base + sign * amp * season[:, None, None] + 0 * lat[None, :, None] + 0 * lon
+    if key == "pr":
+        v = np.clip(v - 1.2, 0, None)
     ds = xr.Dataset(
         {var: (("day", "lat", "lon"), v.astype("float32"))}, coords={"day": days, "lat": lat, "lon": lon}
     )
@@ -326,5 +380,6 @@ class FakeWeb:
         if "reacchpna" in url:
             raise http.ClientError(503, "simulated outage of the first mirror", url)
         if "thredds" in url:
-            return FakeResponse(url, params, _gridmet(p, p["var"]))
+            key = url.rsplit("/", 1)[-1].split("_")[0]
+            return FakeResponse(url, params, _gridmet(p, key))
         raise AssertionError(f"unexpected URL {url}")

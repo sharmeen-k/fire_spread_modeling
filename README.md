@@ -39,9 +39,14 @@ console and to `outputs/logs/`, and records every download (URL, time, SHA-256) 
 | `firespread weather --fire-id N` | Hourly HRRR (analyses + 1-h forecast solar/rain), earth-relative winds, QC flags | `fires/N/weather/hrrr_hourly.zarr` |
 | `firespread stations --fire-id N` | HRRR vs ASOS/RAWS (bias, RMSE by wind regime, terrain position) | `outputs/fire_N_hrrr_station_*` |
 | `firespread fuel-moisture --fire-id N` | Hourly 1/10/100/1000-h dead fuel moisture, Nelson model (NFDRS4) + gridMET | `fires/N/fuel_moisture/dead_fuel_moisture.zarr` |
+| `firespread live-fuel-moisture --fire-id N` | Daily live herbaceous/woody moisture, NFDRS4 GSI model driven by a year of gridMET weather | `fires/N/fuel_moisture/live_fuel_moisture.zarr` |
 | `firespread publish --fire-id N` | Time-enabled hosted feature layer in ArcGIS Online (run in ArcGIS Pro's Python) | AGOL item |
 
-`firespread run-fire --fire-id N` runs stack → weather → stations → fuel-moisture.
+`firespread run-fire --fire-id N` runs stack → weather → stations → fuel-moisture → live-fuel-moisture.
+
+HRRR downloads run in parallel processes (`hrrr.workers` in the config, default 6). The spread
+model's 100-hour dead fuel moisture comes from `fuel_moisture.fm100_source` (`nelson` hourly or
+`gridmet` daily); `fuel_moisture.surface_dead_moisture()` applies the switch.
 `--all` instead of `--fire-id` runs every fire listed under `fires:` in the config.
 
 ### Reproducing everything with DVC

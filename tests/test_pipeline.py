@@ -1,5 +1,7 @@
 """End-to-end run of the whole pipeline on the synthetic study area (offline)."""
 
+import sys
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -117,6 +119,44 @@ def test_fire_pipeline(catalog, web, fake_herbie, fake_nfdrs4):
     )
     assert any("reacchpna" in c for c in web.calls) and any("northwestknowledge" in c for c in web.calls)
 
+    # the spread model's 100-h source is a config switch
+    from firespread.fuel_moisture import surface_dead_moisture
+
+    nel = surface_dead_moisture(cfg, fid)
+    assert set(nel.data_vars) == {"fm1", "fm10", "fm100"} and nel.attrs["fm100_source"] == "nelson"
+    np.testing.assert_array_equal(nel["fm100"].values, fm["fm100"].values)
+    cfg.fuel_moisture.fm100_source = "gridmet"
+    try:
+        gm = surface_dead_moisture(cfg, fid)
+    finally:
+        cfg.fuel_moisture.fm100_source = "nelson"
+    assert gm.attrs["fm100_source"] == "gridmet"
+    np.testing.assert_array_equal(gm["fm1"].values, nel["fm1"].values)
+    t = pd.Timestamp("2017-12-06 05:00")  # 21:00 PST on Dec 5 -> gridMET day Dec 5
+    day_val = fm["fm100_gridmet"].sel(day="2017-12-05").values
+    np.testing.assert_allclose(gm["fm100"].sel(time=t).values, day_val)
+
+    # live fuel moisture (fake NFDRS4 physics; the wiring is tested)
+    run("live-fuel-moisture", "--fire-id", str(fid))
+    from firespread.live_fuel_moisture import cube_path as lfm_path
+
+    lf = io.read_cube(lfm_path(cfg, fid))
+    lt = pd.DatetimeIndex(lf["time"].values)
+    assert (lt.hour == 21).all() and (lt[1:] - lt[:-1] == pd.Timedelta(days=1)).all()
+    assert len(lt) >= 366 and lt[-1] >= pd.Timestamp("2017-12-06")
+    herb, wood = lf["lfm_herb"].values[:, land], lf["lfm_woody"].values[:, land]
+    assert np.isfinite(herb).all() and np.isfinite(wood).all()
+    assert herb.min() >= 30 and wood.min() >= 60 and np.isnan(lf["lfm_herb"].values[:, ~land]).all()
+    # wet winter > dry autumn in the synthetic climate
+    assert (
+        lf["lfm_woody"].sel(time="2017-02-15").values[0][land].mean()
+        > lf["lfm_woody"].sel(time="2017-11-15").values[0][land].mean()
+    )
+    assert (
+        "On the first fire day"
+        in (cfg.outputs_dir / f"fire_{fid}_live_fuel_moisture_summary.txt").read_text()
+    )
+
     # re-running weather is fully cached (no new HRRR requests)
     fakes.FakeHerbie.calls.clear()
     run("weather", "--fire-id", str(fid))
@@ -154,6 +194,24 @@ def test_legacy_caches_are_reused(cfg, fake_herbie, tmp_path):
     assert st == "downloaded" and f.name == "2017120512.nc"
     f2, st2 = c.get("f00", t)
     assert st2 == "cached" and f2 == f
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="worker processes can't see the fake Herbie on Windows")
+def test_parallel_downloads(cfg, fake_herbie):
+    """The process-pool path fetches every hour and the parent writes the manifest."""
+    from firespread.weather import HrrrCache, download
+
+    cfg.hrrr.workers = 3
+    box = (-119.6, 34.0, -118.6, 34.8)
+    hours = pd.date_range("2017-12-05 00:00", periods=8, freq="h")
+    cache = HrrrCache(cfg, 9998, box, record=False)
+    before = len(manifest.read(cfg.data_dir))
+    got, status = download(cfg, 9998, box, cache, hours, retry_missing=False)
+    assert len(got["f00"]) == 8 and len(got["f01"]) == 8
+    assert all(v == "downloaded" for v in status["f00"].values())
+    assert len(manifest.read(cfg.data_dir)) - before == 16
+    _, status2 = download(cfg, 9998, box, cache, hours, retry_missing=False)
+    assert all(v == "cached" for v in status2["f01"].values())
 
 
 def test_cli_help(capsys):

@@ -8,7 +8,8 @@ weather cube: 2 m temperature and RH (analyses), solar radiation and 1-h rain
 1000-h value on the first spin-up day, then is updated hourly exactly as NFDRS4
 drives it: update(elapsed 1 h, T degC, RH g/g, solar W/m2, rain cm/h,
 0.0218 cal/cm3, amount=True) and read medianRadialMoisture().
-gridMET fm100/fm1000 are kept as an independent daily check.
+gridMET fm100/fm1000 are kept as an independent daily check, and the spread
+model's 100-h source is a config switch (surface_dead_moisture).
 
 Output: data/processed/fires/<id>/fuel_moisture/dead_fuel_moisture.zarr
 """
@@ -23,14 +24,13 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from . import http, io, logs, manifest
+from . import gridmet, io, logs
 from .config import Config
 from .weather import cube_path as weather_path
 
 log = logging.getLogger(__name__)
 
 BP = 0.0218  # stick barometric pressure (cal/cm3), NFDRS4 default
-GRIDMET_VARS = {"fm100": "dead_fuel_moisture_100hr", "fm1000": "dead_fuel_moisture_1000hr"}
 STICK = {1: "1", 10: "10", 100: "100", 1000: "1000"}
 
 
@@ -40,60 +40,32 @@ def cube_path(cfg: Config, fire_id: int) -> Path:
 
 # ------------------------------------------------------------------- gridMET
 def gridmet_fetch(cfg: Config, key: str, years, bbox, t0, t1) -> xr.DataArray:
-    cache = cfg.raw_dir / "gridmet"
-    cache.mkdir(parents=True, exist_ok=True)
-    lonmin, latmin, lonmax, latmax = bbox
-    frames = []
-    for y in years:
-        f = cache / f"{key}_{y}_{latmin:.2f}_{latmax:.2f}_{lonmin:.2f}_{lonmax:.2f}.nc"
-        if not f.exists():
-            params = {
-                "var": GRIDMET_VARS[key],
-                "north": latmax,
-                "south": latmin,
-                "west": lonmin,
-                "east": lonmax,
-                "horizStride": 1,
-                "time_start": f"{y}-01-01T00:00:00Z",
-                "time_end": f"{y}-12-31T23:59:59Z",
-                "accept": "netcdf",
-            }
-            last = None
-            for tmpl in cfg.fuel_moisture.gridmet_urls:
-                url = tmpl.format(var=key, year=y)
-                try:
-                    log.info("  downloading gridMET %s %s (%s)", key, y, url.split("/")[2])
-                    r = http.get(url, params=params, timeout=300)
-                    if r.content[:3] in (b"CDF", b"\x89HD"):
-                        f.write_bytes(r.content)
-                        manifest.record(
-                            cfg.data_dir,
-                            source="gridMET (Abatzoglou 2013) NCSS",
-                            url=r.url,
-                            path=f,
-                            step="fuel_moisture",
-                        )
-                        break
-                    last = f"not NetCDF: {r.content[:120]!r}"
-                except Exception as e:  # try the next mirror
-                    last = str(e)
-                log.warning("    failed: %s", last)
-            else:
-                raise RuntimeError(f"gridMET {key} {y} could not be downloaded: {last}")
-        with xr.open_dataset(f) as ds:
-            name = GRIDMET_VARS[key] if GRIDMET_VARS[key] in ds else next(iter(ds.data_vars))
-            da = ds[name].load()
-        tdim = next(d for d in da.dims if d not in ("lat", "lon"))
-        frames.append(da.rename({tdim: "day"}))
-    da = xr.concat(frames, dim="day").sortby("day")
+    da = gridmet.fetch(cfg, key, years, bbox)
     return da.sel(day=slice(t0.tz_convert(None).normalize(), t1.tz_convert(None).normalize()))
 
 
-def gridmet_to_cells(da: xr.DataArray, lat, lon) -> np.ndarray:
-    glat, glon = da["lat"].values, da["lon"].values
-    iy = np.abs(glat[:, None] - lat.ravel()[None, :]).argmin(axis=0)
-    ix = np.abs(glon[:, None] - lon.ravel()[None, :]).argmin(axis=0)
-    return da.values[:, iy, ix].reshape((da.sizes["day"], *lat.shape)).astype(float)
+gridmet_to_cells = gridmet.to_cells
+
+
+# ------------------------------------------------------- spread-model inputs
+def surface_dead_moisture(cfg: Config, fire_id: int) -> xr.Dataset:
+    """Hourly 1-, 10- and 100-h dead fuel moisture (%) on the HRRR grid, as the
+    spread model uses them. 1-h and 10-h are always Nelson; the 100-h source is
+    `fuel_moisture.fm100_source` in the config: "nelson" (hourly) or "gridmet"
+    (daily value held for every hour of its local day)."""
+    ds = io.read_cube(cube_path(cfg, fire_id))
+    out = ds[["fm1", "fm10"]].copy()
+    src = cfg.fuel_moisture.fm100_source
+    if src == "nelson":
+        out["fm100"] = ds["fm100"]
+    else:
+        days = gridmet.local_day(ds["time"].values)
+        g = ds["fm100_gridmet"].sel(day=days.values, method="nearest")
+        out["fm100"] = (("time", "y", "x"), g.values)
+        out["fm100"].attrs = dict(ds["fm100_gridmet"].attrs)
+    out["fm100"].attrs["source"] = src
+    out.attrs = {**ds.attrs, "fm100_source": src}
+    return out
 
 
 # --------------------------------------------------------------------- Nelson

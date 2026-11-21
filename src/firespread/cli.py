@@ -11,7 +11,7 @@ from . import config as config_mod
 
 
 def _fire_steps(cfg, fire_ids, steps, args):
-    from . import fuel_moisture, stack, stations, weather
+    from . import fuel_moisture, live_fuel_moisture, stack, stations, weather
 
     for fid in fire_ids:
         for step in steps:
@@ -23,6 +23,8 @@ def _fire_steps(cfg, fire_ids, steps, args):
                 stations.run(cfg, fid, networks=args.networks, refresh=args.refresh)
             elif step == "fuel-moisture":
                 fuel_moisture.run(cfg, fid, max_cells=args.max_cells, all_cells=args.all_cells)
+            elif step == "live-fuel-moisture":
+                live_fuel_moisture.run(cfg, fid)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -56,7 +58,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--max-cells", type=int, default=0, help="only N cells nearest ignition; writes *.test.zarr"
     )
     p.add_argument("--all-cells", action="store_true", help="include ocean cells")
-    p = fire_parser("run-fire", "stack -> weather -> stations -> fuel-moisture")
+    fire_parser("live-fuel-moisture", "daily live herbaceous/woody fuel moisture (NFDRS4 GSI, gridMET)")
+    p = fire_parser("run-fire", "stack -> weather -> stations -> fuel-moisture -> live-fuel-moisture")
     p.add_argument("--landfire-dir", type=Path)
     p = fire_parser("publish", "publish observed perimeters to ArcGIS Online (needs arcgis)")
     p.add_argument("--overwrite", action="store_true")
@@ -100,7 +103,12 @@ def main(argv: list[str] | None = None) -> int:
                 max_cells=0,
                 all_cells=False,
             )
-            _fire_steps(cfg, fire_ids, ["stack", "weather", "stations", "fuel-moisture"], defaults)
+            _fire_steps(
+                cfg,
+                fire_ids,
+                ["stack", "weather", "stations", "fuel-moisture", "live-fuel-moisture"],
+                defaults,
+            )
         else:
             _fire_steps(cfg, fire_ids, [args.cmd], args)
     except (RuntimeError, FileNotFoundError, KeyError, ValueError) as e:

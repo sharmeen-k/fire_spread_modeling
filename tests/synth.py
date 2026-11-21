@@ -71,6 +71,7 @@ def build(root: Path) -> Path:
     raw.mkdir(parents=True)
     cfg = yaml.safe_load((REPO / "config" / "pipeline.yaml").read_text())
     cfg["fires"] = [4299]
+    cfg["hrrr"]["workers"] = 1  # fakes live in this process; the parallel path has its own test
     (root / "config").mkdir()
     (root / "config" / "pipeline.yaml").write_text(yaml.safe_dump(cfg, sort_keys=False))
 

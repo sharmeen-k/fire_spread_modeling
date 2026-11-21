@@ -90,7 +90,8 @@ stages:
         - src/firespread/io.py
       params:
         - config/pipeline.yaml:
-            - hrrr
+            - hrrr.lead_hours
+            - hrrr.margin_deg
             - fuel_moisture.spinup_days
       outs:
         - data/processed/fires/${item}/weather/hrrr_hourly.zarr
@@ -125,11 +126,33 @@ stages:
         - data/processed/fires/${item}/weather/hrrr_hourly.zarr
         - data/processed/fires/${item}/perimeters
         - src/firespread/fuel_moisture.py
+        - src/firespread/gridmet.py
       params:
         - config/pipeline.yaml:
-            - fuel_moisture
+            - fuel_moisture.spinup_days
+            - fuel_moisture.classes
+            - fuel_moisture.afternoon_utc_hour
+            - fuel_moisture.gridmet_urls
       outs:
         - data/processed/fires/${item}/fuel_moisture/dead_fuel_moisture.zarr
         - outputs/fire_${item}_fuel_moisture_summary.txt: {cache: false}
         - outputs/fire_${item}_fuel_moisture_timeseries.png: {cache: false}
         - outputs/fire_${item}_fuel_moisture_map.png: {cache: false}
+
+  live_fuel_moisture:
+    foreach: ${fires}
+    do:
+      cmd: firespread live-fuel-moisture --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - data/processed/fires/${item}/perimeters
+        - src/firespread/live_fuel_moisture.py
+        - src/firespread/gridmet.py
+      params:
+        - config/pipeline.yaml:
+            - live_fuel_moisture
+            - fuel_moisture.gridmet_urls
+      outs:
+        - data/processed/fires/${item}/fuel_moisture/live_fuel_moisture.zarr
+        - outputs/fire_${item}_live_fuel_moisture_summary.txt: {cache: false}
+        - outputs/fire_${item}_live_fuel_moisture_timeseries.png: {cache: false}
