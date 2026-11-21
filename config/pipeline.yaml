@@ -1,0 +1,68 @@
+# Pipeline configuration. Every step reads this file (override with
+# FIRESPREAD_CONFIG=<path> or --config). Paths are relative to the repo root.
+
+project:
+  crs: "EPSG:32611"          # UTM 11N, all 30 m model grids
+  resolution_m: 30.0
+  snap_m: 750.0              # grid edges on a 750 m lattice (LCM of 30 m and 375 m VIIRS)
+  buffer_m: 5000.0           # grid buffer around a fire's full extent
+
+paths:
+  data: data
+  outputs: outputs
+
+inputs:                      # manually obtained source files (tracked with `dvc add`)
+  largefire_archive: data/raw/Largefire.tar.gz      # Chen et al. 2022, figshare 5601537
+  counties_zip: data/raw/ca_counties.zip
+  frap_zip: data/raw/fire251gdb.zip                 # CAL FIRE FRAP fire perimeters
+  landfire_root: data/raw/landfire                  # one sub-folder per LANDFIRE version
+
+landfire_rules:              # first rule whose max_year >= fire year wins
+  - {max_year: 2017, version: LF2016_Remap}
+  - {max_year: 2020, version: LF2020}
+
+study:
+  counties: [Imperial, Kern, Los Angeles, Orange, Riverside, San Bernardino,
+             San Diego, San Luis Obispo, Santa Barbara, Ventura]
+  hrrr_start: "2014-09-30"   # first day of the operational HRRR archive
+  test_fires: {4299: "Thomas 2017", 3922: "Woolsey 2018"}
+  frap_targets: {THOMAS: 2017, WOOLSEY: 2018}
+  match_window_days: 7
+  split:
+    n_val: 3
+    seed: 42
+    max_days: 60             # drop multi-year merged objects
+    min_records: 2           # >= 2 records for one 12-hour sample
+    min_records_val: 6
+    min_area_val_km2: 20
+    exclude_concurrent: true # drop fires burning during a test fire
+
+fires: [4299]                # fires the per-fire pipeline runs on (dvc.yaml foreach)
+
+hrrr:
+  lead_hours: 24             # analysis period starts this long before the first observation
+  margin_deg: 0.1            # crop box margin around the fire grid
+  priority: [aws, google]
+
+stations:
+  match_tolerance_min: 30
+  min_wspd_for_dir: 2.0
+  max_cell_dist_km: 3.0
+  box_shrink_deg: 0.03
+  terrain_window_m: 3000
+  raws_network: "2"
+  offshore: {dir_min: 0.0, dir_max: 110.0, wspd_min: 5.0, rh_max: 25.0, cell_fraction: 0.20}
+
+fuel_moisture:
+  spinup_days: 7.0           # weather (and Nelson) start this long before the analysis period
+  classes: [1, 10, 100, 1000]
+  afternoon_utc_hour: 21     # ~13:00 PST, the time of day gridMET/NFDRS values represent
+  gridmet_urls:
+    - "https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc"
+    - "http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc"
+
+publish:
+  auth: pro                  # "pro" = ArcGIS Pro's signed-in session (works with UCR SSO)
+  portal_url: null           # used with auth: oauth
+  client_id: null            # OAuth app client ID, used with auth: oauth
+  title_template: "Fire_{fire_id}_observed_VIIRS"

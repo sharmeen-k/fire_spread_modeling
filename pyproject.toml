@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "firespread"
+version = "0.2.0"
+description = "Hybrid wildfire spread modeling for Southern California: data pipeline, physics core and ML correction"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+authors = [{ name = "Sharmeen Kazi" }]
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=2.2",
+    "pandas>=2.2",
+    "geopandas>=1.0",
+    "pyogrio>=0.10",
+    "shapely>=2.0",
+    "rasterio>=1.4",
+    "pyproj>=3.7",
+    "xarray>=2025.1",
+    "netCDF4>=1.7",
+    "zarr>=3.0",
+    "requests>=2.32",
+    "matplotlib>=3.9",
+    "herbie-data>=2025.1",
+    "pyyaml>=6.0",
+    "pydantic>=2.8",
+    # USDA Forest Service Missoula Fire Sciences Lab NFDRS4 (Nelson dead fuel
+    # moisture, GSI live fuel moisture). Built from source: needs a C++ compiler.
+    "nfdrs4 @ git+https://github.com/firelab/NFDRS4@b0e72b6f4b5d0fb7fc83e01e25405cd8165a2552",
+]
+
+[project.optional-dependencies]
+# ArcGIS publishing runs in ArcGIS Pro's Python (arcgispro-py3), which ships arcgis.
+publish = ["arcgis>=2.4"]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "ruff>=0.8", "pre-commit>=4.0", "dvc>=3.55"]
+
+[project.scripts]
+firespread = "firespread.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/firespread"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "nfdrs4: needs the real nfdrs4 package (skipped when it is not installed)",
+]
+filterwarnings = ["ignore::DeprecationWarning:herbie.*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY", "PD002", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003", "RUF046", "B905"]
