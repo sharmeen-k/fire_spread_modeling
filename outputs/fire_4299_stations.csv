@@ -1,0 +1,5 @@
+network,stid,name,lat,lon,elev_m,hrrr_iy,hrrr_ix,n_hours,hrrr_dist_km,dem_elev_m,rel_elev_3km_m,in_model_grid,terrain_src
+ASOS,CMA,CAMARILLO (AWOS),34.2138,-119.0944,23.0000,6,24,507,1.9000,20.6146,-4.3772,False,3dep
+ASOS,NTD,PT MUGU NAWS,34.1200,-119.1200,2.0000,2,22,591,1.1500,3.0415,0.5052,False,3dep
+ASOS,OXR,OXNARD,34.2008,-119.2072,13.0000,6,20,599,0.2400,11.0729,-0.0304,False,3dep
+ASOS,SBA,SANTA BARBARA MUNI,34.4261,-119.8436,3.0000,19,3,599,0.9300,2.9410,-3.4433,False,3dep

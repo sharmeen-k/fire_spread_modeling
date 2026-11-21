@@ -1,7 +1,23 @@
+# environments
 .venv/
-data/
-*.gpkg
-*.tar.gz
+.venv_broken/
+.venv-arcgis/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# data: everything under data/ is local; DVC tracks it via *.dvc files and dvc.lock
+/data/**
+!/data/**/
+!/data/**/*.dvc
+!/data/**/.gitignore
+
+# run logs
+outputs/logs/
+
+# local notes / editors
+.vscode/
 Tonight_Milestone_Checklist.pdf
 Wildfire_Capstone_5-Week_Strategy.pdf
-.vscode/
+.env

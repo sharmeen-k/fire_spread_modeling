@@ -1,0 +1,136 @@
+schema: '2.0'
+stages:
+  inspect:
+    cmd: firespread inspect
+    deps:
+    - path: data/raw/Largefire.tar.gz
+      hash: md5
+      md5: fdb5f5130194b2d12e544d9672a1a43c
+      size: 98667168
+    - path: data/raw/ca_counties.zip
+      hash: md5
+      md5: 76d52888e20ff168c053da3e8525668c
+      size: 2597712
+    - path: data/raw/fire251gdb.zip
+      hash: md5
+      md5: 6c4d80ce33ec0a89ba291a7e70352978
+      size: 62987902
+    - path: src/firespread/catalog.py
+      hash: md5
+      md5: 0f54b754880dda33cb437f885242b713
+      size: 7828
+    outs:
+    - path: outputs/boundaries_schema.txt
+      hash: md5
+      md5: 83ebfd736b97bbc203b1db0f7afabd7f
+      size: 3615
+    - path: outputs/largefire_schema.txt
+      hash: md5
+      md5: e43eb09d9bd339d9b508762742e9f3a5
+      size: 2262
+  socal:
+    cmd: firespread socal
+    deps:
+    - path: data/raw/Largefire.tar.gz
+      hash: md5
+      md5: fdb5f5130194b2d12e544d9672a1a43c
+      size: 98667168
+    - path: data/raw/ca_counties.zip
+      hash: md5
+      md5: 76d52888e20ff168c053da3e8525668c
+      size: 2597712
+    - path: src/firespread/catalog.py
+      hash: md5
+      md5: 0f54b754880dda33cb437f885242b713
+      size: 7828
+    - path: src/firespread/perimeters.py
+      hash: md5
+      md5: ea322fa85360ea9aa9aa197eb092a9e5
+      size: 2521
+    params:
+      config/pipeline.yaml:
+        study.counties:
+        - Imperial
+        - Kern
+        - Los Angeles
+        - Orange
+        - Riverside
+        - San Bernardino
+        - San Diego
+        - San Luis Obispo
+        - Santa Barbara
+        - Ventura
+        study.hrrr_start: '2014-09-30'
+    outs:
+    - path: data/processed/socal_perimeters.gpkg
+      hash: md5
+      md5: f56c685e8088539fd5d50e4187c10912
+      size: 16429056
+    - path: outputs/socal_fires.csv
+      hash: md5
+      md5: c59f699c1202210071e021f7dac763ec
+      size: 17014
+  test_fires:
+    cmd: firespread test-fires
+    deps:
+    - path: data/processed/socal_perimeters.gpkg
+      hash: md5
+      md5: f56c685e8088539fd5d50e4187c10912
+      size: 16429056
+    - path: data/raw/fire251gdb.zip
+      hash: md5
+      md5: 6c4d80ce33ec0a89ba291a7e70352978
+      size: 62987902
+    - path: outputs/socal_fires.csv
+      hash: md5
+      md5: c59f699c1202210071e021f7dac763ec
+      size: 17014
+    - path: src/firespread/catalog.py
+      hash: md5
+      md5: 0f54b754880dda33cb437f885242b713
+      size: 7828
+    params:
+      config/pipeline.yaml:
+        study.frap_targets:
+          THOMAS: 2017
+          WOOLSEY: 2018
+        study.match_window_days: 7
+    outs:
+    - path: outputs/test_fire_candidates.csv
+      hash: md5
+      md5: 4bd156de4f97cc975b72ce80c5695e0a
+      size: 330
+  split:
+    cmd: firespread split
+    deps:
+    - path: data/processed/socal_perimeters.gpkg
+      hash: md5
+      md5: f56c685e8088539fd5d50e4187c10912
+      size: 16429056
+    - path: outputs/socal_fires.csv
+      hash: md5
+      md5: c59f699c1202210071e021f7dac763ec
+      size: 17014
+    - path: src/firespread/split.py
+      hash: md5
+      md5: 1c3b22fb565a96d1b1e53ffb4a302a26
+      size: 3398
+    params:
+      config/pipeline.yaml:
+        study.hrrr_start: '2014-09-30'
+        study.split:
+          n_val: 3
+          seed: 42
+          max_days: 60
+          min_records: 2
+          min_records_val: 6
+          min_area_val_km2: 20
+          exclude_concurrent: true
+        study.test_fires:
+          4299: Thomas 2017
+          3922: Woolsey 2018
+    outs:
+    - path: outputs/split.csv
+      hash: md5
+      md5: 79026c0c8da4532d40a787da27d8a2be
+      size: 13838

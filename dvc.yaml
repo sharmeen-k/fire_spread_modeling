@@ -1,0 +1,135 @@
+# Reproducible pipeline: `uv run dvc repro` re-runs only what changed; `uv run dvc dag` shows it.
+# Per-fire stages run for every fire listed under `fires:` in config/pipeline.yaml.
+vars:
+  - config/pipeline.yaml
+
+stages:
+  inspect:
+    cmd: firespread inspect
+    deps:
+      - data/raw/Largefire.tar.gz
+      - data/raw/ca_counties.zip
+      - data/raw/fire251gdb.zip
+      - src/firespread/catalog.py
+    outs:
+      - outputs/largefire_schema.txt: {cache: false}
+      - outputs/boundaries_schema.txt: {cache: false}
+
+  socal:
+    cmd: firespread socal
+    deps:
+      - data/raw/Largefire.tar.gz
+      - data/raw/ca_counties.zip
+      - src/firespread/catalog.py
+      - src/firespread/perimeters.py
+    params:
+      - config/pipeline.yaml:
+          - study.counties
+          - study.hrrr_start
+    outs:
+      - data/processed/socal_perimeters.gpkg
+      - outputs/socal_fires.csv: {cache: false}
+
+  test_fires:
+    cmd: firespread test-fires
+    deps:
+      - data/processed/socal_perimeters.gpkg
+      - outputs/socal_fires.csv
+      - data/raw/fire251gdb.zip
+      - src/firespread/catalog.py
+    params:
+      - config/pipeline.yaml:
+          - study.frap_targets
+          - study.match_window_days
+    outs:
+      - outputs/test_fire_candidates.csv: {cache: false}
+
+  split:
+    cmd: firespread split
+    deps:
+      - outputs/socal_fires.csv
+      - data/processed/socal_perimeters.gpkg
+      - src/firespread/split.py
+    params:
+      - config/pipeline.yaml:
+          - study.split
+          - study.test_fires
+          - study.hrrr_start
+    outs:
+      - outputs/split.csv: {cache: false}
+
+  stack:
+    foreach: ${fires}
+    do:
+      cmd: firespread stack --fire-id ${item}
+      deps:
+        - data/processed/socal_perimeters.gpkg
+        - data/raw/landfire
+        - src/firespread/stack.py
+        - src/firespread/io.py
+      params:
+        - config/pipeline.yaml:
+            - project
+            - landfire_rules
+      outs:
+        - data/processed/fires/${item}/grid.json
+        - data/processed/fires/${item}/static:
+            persist: true   # keeps the downloaded DEM between runs
+        - data/processed/fires/${item}/perimeters
+        - outputs/fire_${item}_stack_summary.txt: {cache: false}
+        - outputs/fire_${item}_alignment.png: {cache: false}
+
+  weather:
+    foreach: ${fires}
+    do:
+      cmd: firespread weather --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/grid.json
+        - data/processed/fires/${item}/perimeters
+        - src/firespread/weather.py
+        - src/firespread/io.py
+      params:
+        - config/pipeline.yaml:
+            - hrrr
+            - fuel_moisture.spinup_days
+      outs:
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - outputs/fire_${item}_hrrr_summary.txt: {cache: false}
+        - outputs/fire_${item}_hrrr_timeseries.png: {cache: false}
+
+  stations:
+    foreach: ${fires}
+    do:
+      cmd: firespread stations --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - data/processed/fires/${item}/static
+        - src/firespread/stations.py
+      params:
+        - config/pipeline.yaml:
+            - stations
+      outs:
+        - outputs/fire_${item}_stations.csv: {cache: false}
+        - outputs/fire_${item}_hrrr_station_pairs.csv: {cache: false}
+        - outputs/fire_${item}_station_map.png: {cache: false}
+        - outputs/fire_${item}_hrrr_station_scatter.png: {cache: false}
+        - outputs/fire_${item}_hrrr_station_timeseries.png: {cache: false}
+      metrics:
+        - outputs/fire_${item}_hrrr_station_metrics.csv: {cache: false}
+
+  fuel_moisture:
+    foreach: ${fires}
+    do:
+      cmd: firespread fuel-moisture --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - data/processed/fires/${item}/perimeters
+        - src/firespread/fuel_moisture.py
+      params:
+        - config/pipeline.yaml:
+            - fuel_moisture
+      outs:
+        - data/processed/fires/${item}/fuel_moisture/dead_fuel_moisture.zarr
+        - outputs/fire_${item}_fuel_moisture_summary.txt: {cache: false}
+        - outputs/fire_${item}_fuel_moisture_timeseries.png: {cache: false}
+        - outputs/fire_${item}_fuel_moisture_map.png: {cache: false}
