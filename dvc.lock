@@ -148,8 +148,8 @@ stages:
       nfiles: 60
     - path: src/firespread/io.py
       hash: md5
-      md5: 4d07f769372b1407665bef2a4331d282
-      size: 12687
+      md5: f082dae202fbaa0b7cdf34638a71d3f9
+      size: 12640
     - path: src/firespread/stack.py
       hash: md5
       md5: 0739e448a11e5f25d8f7c057c058e885
@@ -173,12 +173,12 @@ stages:
       size: 464
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: 93bc117c317790abdc408a1ec9bad27c.dir
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
       size: 93593
       nfiles: 4
     - path: data/processed/fires/4299/static
       hash: md5
-      md5: 87fde9b79043b230f401d8388e3284e4.dir
+      md5: 4fcc283b916660d67374e2d83573939b.dir
       size: 62864412
       nfiles: 8
     - path: outputs/fire_4299_alignment.png
@@ -198,36 +198,32 @@ stages:
       size: 464
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: 93bc117c317790abdc408a1ec9bad27c.dir
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
       size: 93593
       nfiles: 4
     - path: src/firespread/io.py
       hash: md5
-      md5: 4d07f769372b1407665bef2a4331d282
-      size: 12687
+      md5: f082dae202fbaa0b7cdf34638a71d3f9
+      size: 12640
     - path: src/firespread/weather.py
       hash: md5
-      md5: 5232851307929c28b1063324441eefb6
-      size: 17623
+      md5: 1339e9ba1a633d67faf461ec5e896c4d
+      size: 20160
     params:
       config/pipeline.yaml:
         fuel_moisture.spinup_days: 30.0
-        hrrr:
-          lead_hours: 24
-          margin_deg: 0.1
-          priority:
-          - aws
-          - google
+        hrrr.lead_hours: 24
+        hrrr.margin_deg: 0.1
     outs:
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: c62a6904111ee36b7d3b732fc620ba9c.dir
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
       size: 35836735
       nfiles: 175
     - path: outputs/fire_4299_hrrr_summary.txt
       hash: md5
-      md5: 4cc57bc176eff744b3af393f99e291dc
-      size: 1834
+      md5: 4380cc647df9c6694db6a67b36c9ea9b
+      size: 1832
     - path: outputs/fire_4299_hrrr_timeseries.png
       hash: md5
       md5: c800082ca2485ff08a50719799f757f9
@@ -237,12 +233,12 @@ stages:
     deps:
     - path: data/processed/fires/4299/static
       hash: md5
-      md5: 87fde9b79043b230f401d8388e3284e4.dir
+      md5: 4fcc283b916660d67374e2d83573939b.dir
       size: 62864412
       nfiles: 8
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: c62a6904111ee36b7d3b732fc620ba9c.dir
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
       size: 35836735
       nfiles: 175
     - path: src/firespread/stations.py
@@ -294,35 +290,38 @@ stages:
     deps:
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: 93bc117c317790abdc408a1ec9bad27c.dir
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
       size: 93593
       nfiles: 4
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: c62a6904111ee36b7d3b732fc620ba9c.dir
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
       size: 35836735
       nfiles: 175
     - path: src/firespread/fuel_moisture.py
       hash: md5
-      md5: f435483759004cb2704979923b755e81
-      size: 16290
+      md5: a2b678548313daea1c13f49364f22ea5
+      size: 14552
+    - path: src/firespread/gridmet.py
+      hash: md5
+      md5: c72dec76e327241c32a341c5ebdfe91f
+      size: 4344
     params:
       config/pipeline.yaml:
-        fuel_moisture:
-          spinup_days: 30.0
-          classes:
-          - 1
-          - 10
-          - 100
-          - 1000
-          afternoon_utc_hour: 21
-          gridmet_urls:
-          - https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc
-          - http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc
+        fuel_moisture.afternoon_utc_hour: 21
+        fuel_moisture.classes:
+        - 1
+        - 10
+        - 100
+        - 1000
+        fuel_moisture.gridmet_urls:
+        - https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc
+        - http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc
+        fuel_moisture.spinup_days: 30.0
     outs:
     - path: data/processed/fires/4299/fuel_moisture/dead_fuel_moisture.zarr
       hash: md5
-      md5: c065b7edb4435592fab920d7ff998876.dir
+      md5: 8f0755780aab31a6a4e69e0991655ef9.dir
       size: 8488700
       nfiles: 53
     - path: outputs/fire_4299_fuel_moisture_map.png
@@ -337,3 +336,47 @@ stages:
       hash: md5
       md5: a7db6ff1908e5ee8037cb0af7baa59e1
       size: 300817
+  live_fuel_moisture@4299:
+    cmd: firespread live-fuel-moisture --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/perimeters
+      hash: md5
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      size: 93593
+      nfiles: 4
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      size: 35836735
+      nfiles: 175
+    - path: src/firespread/gridmet.py
+      hash: md5
+      md5: c72dec76e327241c32a341c5ebdfe91f
+      size: 4344
+    - path: src/firespread/live_fuel_moisture.py
+      hash: md5
+      md5: b1f7aa5b68e37b2e65af34b924b03541
+      size: 10182
+    params:
+      config/pipeline.yaml:
+        fuel_moisture.gridmet_urls:
+        - https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc
+        - http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc
+        live_fuel_moisture:
+          spinup_days: 365
+          herbs_annual: true
+          obs_hour_utc: 21
+    outs:
+    - path: data/processed/fires/4299/fuel_moisture/live_fuel_moisture.zarr
+      hash: md5
+      md5: 013589ded5da0ec4718792ce5eab3215.dir
+      size: 1212146
+      nfiles: 36
+    - path: outputs/fire_4299_live_fuel_moisture_summary.txt
+      hash: md5
+      md5: 1a90f585da7c75941796e681f57e2ab8
+      size: 1335
+    - path: outputs/fire_4299_live_fuel_moisture_timeseries.png
+      hash: md5
+      md5: ba64745b305b3857eef896b8ddb83f4d
+      size: 128968
