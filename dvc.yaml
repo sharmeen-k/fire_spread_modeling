@@ -156,3 +156,20 @@ stages:
         - data/processed/fires/${item}/fuel_moisture/live_fuel_moisture.zarr
         - outputs/fire_${item}_live_fuel_moisture_summary.txt: {cache: false}
         - outputs/fire_${item}_live_fuel_moisture_timeseries.png: {cache: false}
+
+  lfmc_check:
+    foreach: ${fires}
+    do:
+      cmd: firespread lfmc-check --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/fuel_moisture/live_fuel_moisture.zarr
+        - data/raw/lfmc
+        - src/firespread/lfmc_check.py
+      params:
+        - config/pipeline.yaml:
+            - lfmc_validation
+      outs:
+        - outputs/fire_${item}_lfmc_check.csv: {cache: false}
+        - outputs/fire_${item}_lfmc_check.png: {cache: false}
+      metrics:
+        - outputs/fire_${item}_lfmc_check_summary.txt: {cache: false}

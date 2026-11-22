@@ -100,6 +100,13 @@ class LiveFuelMoistureCfg(_Model):
     obs_hour_utc: int = 21  # NFDRS observation time, ~13:00 PST
 
 
+class LfmcValidationCfg(_Model):
+    file: str = "data/raw/lfmc/Globe-LFMC-2.0 final.xlsx"
+    species: list[str] = Field(default_factory=lambda: ["Adenostoma fasciculatum"])  # chamise
+    radius_km: float = 60.0
+    near_fire_days: int = 60
+
+
 class PublishCfg(_Model):
     auth: str = "pro"
     portal_url: str | None = None
@@ -118,6 +125,7 @@ class Config(_Model):
     stations: StationsCfg = Field(default_factory=StationsCfg)
     fuel_moisture: FuelMoistureCfg
     live_fuel_moisture: LiveFuelMoistureCfg = Field(default_factory=LiveFuelMoistureCfg)
+    lfmc_validation: LfmcValidationCfg = Field(default_factory=LfmcValidationCfg)
     publish: PublishCfg = Field(default_factory=PublishCfg)
 
     # set by load(); not part of the YAML

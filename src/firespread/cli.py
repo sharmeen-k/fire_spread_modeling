@@ -11,7 +11,7 @@ from . import config as config_mod
 
 
 def _fire_steps(cfg, fire_ids, steps, args):
-    from . import fuel_moisture, live_fuel_moisture, stack, stations, weather
+    from . import fuel_moisture, lfmc_check, live_fuel_moisture, stack, stations, weather
 
     for fid in fire_ids:
         for step in steps:
@@ -25,6 +25,8 @@ def _fire_steps(cfg, fire_ids, steps, args):
                 fuel_moisture.run(cfg, fid, max_cells=args.max_cells, all_cells=args.all_cells)
             elif step == "live-fuel-moisture":
                 live_fuel_moisture.run(cfg, fid)
+            elif step == "lfmc-check":
+                lfmc_check.run(cfg, fid)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -59,6 +61,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--all-cells", action="store_true", help="include ocean cells")
     fire_parser("live-fuel-moisture", "daily live herbaceous/woody fuel moisture (NFDRS4 GSI, gridMET)")
+    fire_parser("lfmc-check", "compare live fuel moisture with Globe-LFMC field samples (chamise)")
     p = fire_parser("run-fire", "stack -> weather -> stations -> fuel-moisture -> live-fuel-moisture")
     p.add_argument("--landfire-dir", type=Path)
     p = fire_parser("publish", "publish observed perimeters to ArcGIS Online (needs arcgis)")

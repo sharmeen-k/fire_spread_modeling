@@ -68,6 +68,12 @@ live_fuel_moisture:          # NFDRS4 GSI model (herbaceous + woody), driven by 
   herbs_annual: true
   obs_hour_utc: 21
 
+lfmc_validation:             # field samples: Globe-LFMC 2.0 (Yebra et al. 2024), tracked with DVC
+  file: "data/raw/lfmc/Globe-LFMC-2.0 final.xlsx"
+  species: [Adenostoma fasciculatum]   # chamise
+  radius_km: 60
+  near_fire_days: 60
+
 publish:
   auth: pro                  # "pro" = ArcGIS Pro's signed-in session (works with UCR SSO)
   portal_url: null           # used with auth: oauth

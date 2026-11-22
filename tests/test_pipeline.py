@@ -157,6 +157,15 @@ def test_fire_pipeline(catalog, web, fake_herbie, fake_nfdrs4):
         in (cfg.outputs_dir / f"fire_{fid}_live_fuel_moisture_summary.txt").read_text()
     )
 
+    # live fuel moisture vs (synthetic) Globe-LFMC chamise samples
+    run("lfmc-check", "--fire-id", str(fid))
+    chk = io.read_table(cfg.outputs_dir / f"fire_{fid}_lfmc_check.csv", ["date"])
+    assert set(chk["site"]) == {"Ventura Hills", "Ojai Valley"}  # far, wrong-species and foreign rows dropped
+    assert (chk["n_samples"] == 2).all() and chk["model_woody"].notna().all()
+    assert (cfg.processed_dir / "lfmc" / "globe_lfmc_us.csv").exists()
+    txt = (cfg.outputs_dir / f"fire_{fid}_lfmc_check_summary.txt").read_text()
+    assert "By site" in txt and "Mar-May" in txt
+
     # re-running weather is fully cached (no new HRRR requests)
     fakes.FakeHerbie.calls.clear()
     run("weather", "--fire-id", str(fid))

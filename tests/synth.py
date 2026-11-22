@@ -194,5 +194,35 @@ def build(root: Path) -> Path:
             nodata=32767,
         ) as d:
             d.write(a, 1)
+    # Globe-LFMC-like workbook (chamise near the Thomas-like fire + other rows)
+    lfd = raw / "lfmc"
+    lfd.mkdir()
+    dates = pd.date_range("2017-01-10", "2017-12-20", freq="14D")
+    recs = []
+    for site, la, lo in (("Ventura Hills", 34.45, -119.15), ("Ojai Valley", 34.50, -119.25)):
+        for d in dates:
+            for k in range(2):
+                recs.append(
+                    {
+                        "Site name": site,
+                        "Country": "United States",
+                        "State/Region": "CA",
+                        "Latitude (WGS84, EPSG:4326)": la,
+                        "Longitude (WGS84, EPSG:4326)": lo,
+                        "Sampling date (YYYYMMDD)": d,
+                        "LFMC value (%)": 60 + 60 * (d.month in (3, 4, 5)) + k,
+                        "Species collected": "Adenostoma fasciculatum",
+                        "Species functional type": "Shrub",
+                        "Individual sample or mean value": "Individual sample",
+                        "Elevation (m.a.s.l)": 300.0,
+                    }
+                )
+    recs.append({**recs[0], "Site name": "Far away", "Latitude (WGS84, EPSG:4326)": 40.0})
+    recs.append({**recs[0], "Site name": "Grass", "Species collected": "Bromus"})
+    recs.append({**recs[0], "Site name": "Abroad", "Country": "Spain"})
+    with pd.ExcelWriter(lfd / "Globe-LFMC-2.0 final.xlsx") as xw:
+        pd.DataFrame({"Contact": ["x"]}).to_excel(xw, sheet_name="Contact", index=False)
+        pd.DataFrame(recs).to_excel(xw, sheet_name="LFMC data", index=False)
+        pd.DataFrame({"Protocol code": [1]}).to_excel(xw, sheet_name="Protocol", index=False)
     shutil.rmtree(root / "_build")
     return root / "config" / "pipeline.yaml"
