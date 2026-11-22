@@ -107,6 +107,13 @@ class LfmcValidationCfg(_Model):
     near_fire_days: int = 60
 
 
+class SurfaceSpreadCfg(_Model):
+    roi_buffer_m: float = Field(default=3000.0, ge=0)  # window = final extent + buffer
+    hour_stride: int = Field(default=1, ge=1)  # run Rothermel every n-th hour of a step
+    min_new_cells: int = Field(default=150, ge=1)  # ~1 VIIRS 375 m pixel at 30 m
+    wind_limit: bool = False  # behave default
+
+
 class PublishCfg(_Model):
     auth: str = "pro"
     portal_url: str | None = None
@@ -126,6 +133,7 @@ class Config(_Model):
     fuel_moisture: FuelMoistureCfg
     live_fuel_moisture: LiveFuelMoistureCfg = Field(default_factory=LiveFuelMoistureCfg)
     lfmc_validation: LfmcValidationCfg = Field(default_factory=LfmcValidationCfg)
+    surface_spread: SurfaceSpreadCfg = Field(default_factory=SurfaceSpreadCfg)
     publish: PublishCfg = Field(default_factory=PublishCfg)
 
     # set by load(); not part of the YAML

@@ -74,6 +74,12 @@ lfmc_validation:             # field samples: Globe-LFMC 2.0 (Yebra et al. 2024)
   radius_km: 60
   near_fire_days: 60
 
+surface_spread:              # Rothermel (behave port) on the fire grid, per perimeter step
+  roi_buffer_m: 3000          # window = final fire extent + this
+  hour_stride: 1              # run every hour
+  min_new_cells: 150          # steps with less new area are not scored
+  wind_limit: false           # behave default
+
 publish:
   auth: pro                  # "pro" = ArcGIS Pro's signed-in session (works with UCR SSO)
   portal_url: null           # used with auth: oauth

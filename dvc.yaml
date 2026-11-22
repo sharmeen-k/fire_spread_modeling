@@ -173,3 +173,26 @@ stages:
         - outputs/fire_${item}_lfmc_check.png: {cache: false}
       metrics:
         - outputs/fire_${item}_lfmc_check_summary.txt: {cache: false}
+
+  surface_spread:
+    foreach: ${fires}
+    do:
+      cmd: firespread surface-spread --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/static
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - data/processed/fires/${item}/fuel_moisture/dead_fuel_moisture.zarr
+        - data/processed/fires/${item}/fuel_moisture/live_fuel_moisture.zarr
+        - src/firespread/rothermel.py
+        - src/firespread/data/fuel_models.csv
+        - src/firespread/surface_spread.py
+      params:
+        - config/pipeline.yaml:
+            - surface_spread
+            - fuel_moisture.fm100_source
+      outs:
+        - data/processed/fires/${item}/spread/rothermel_steps.zarr
+        - outputs/fire_${item}_surface_spread_steps.csv: {cache: false}
+        - outputs/fire_${item}_surface_spread.png: {cache: false}
+      metrics:
+        - outputs/fire_${item}_surface_spread_summary.txt: {cache: false}

@@ -155,3 +155,25 @@ def test_all_landfire_fbfm40_codes_defined():
     t = R.fuel_table()
     assert all(t.defined[c] for c in codes)
     assert not any(t.burnable(c) for c in (91, 92, 93, 98, 99))
+
+
+def test_grid_helpers():
+    from firespread import surface_spread as S
+
+    # UTM 11N west of the central meridian (-117): meridians lean east going north, by ~(dlon * sin lat)
+    g = S.true_north_azimuth(np.array([-119.1]), np.array([34.4]), "EPSG:32611")[0]
+    assert g == pytest.approx(2.1 * math.sin(math.radians(34.4)), abs=0.05)
+    assert S.true_north_azimuth(np.array([-117.0]), np.array([34.4]), "EPSG:32611")[0] == pytest.approx(
+        0, abs=1e-3
+    )
+    # bilinear reproduces a plane, ascending or descending axes
+    xs, ys = np.array([0.0, 10, 20]), np.array([100.0, 50, 0])
+    f = 2 * xs[None, :] + 3 * ys[:, None]
+    b = S.Bilinear(xs, ys, np.array([5.0, 17]), np.array([20.0, 80]))
+    assert np.allclose(b(f), [2 * 5 + 3 * 20, 2 * 17 + 3 * 80])
+    # nearest-land fill
+    land = np.array([[True, False], [False, False]])
+    v = np.where(land, 7.0, np.nan)
+    assert np.all(S.fill(v, S.nearest_land_index(land)) == 7.0)
+    st = S.error_stats([1, 2, 4], [2, 2, 2])
+    assert st["n"] == 3 and st["within_2x"] == 100 and st["under"] == pytest.approx(100 / 3)

@@ -79,6 +79,15 @@ VARIABLES: dict[str, dict[str, str]] = {
     "fm1000_gridmet": {"units": "%", "long_name": "gridMET 1000-h dead fuel moisture (daily)"},
     "lfm_herb": {"units": "%", "long_name": "live herbaceous fuel moisture (NFDRS4 GSI model)"},
     "lfm_woody": {"units": "%", "long_name": "live woody fuel moisture (NFDRS4 GSI model)"},
+    "ros_mean": {
+        "units": "m min-1",
+        "long_name": "Rothermel forward spread rate, mean over the step's hours",
+    },
+    "ros_max": {
+        "units": "m min-1",
+        "long_name": "Rothermel forward spread rate, maximum over the step's hours",
+    },
+    "fli_max": {"units": "kW m-1", "long_name": "Byram fireline intensity of the head fire, step maximum"},
     "gsi": {"units": "1", "long_name": "Growing Season Index, 21-day running mean (NFDRS4)"},
 }
 
@@ -263,7 +272,16 @@ def _apply_attrs(ds: xr.Dataset) -> None:
             ds[name].attrs.update(attrs)
 
 
-def write_cube(ds: xr.Dataset, path: Path, *, title: str, source: str, **attrs) -> Path:
+def write_cube(
+    ds: xr.Dataset,
+    path: Path,
+    *,
+    title: str,
+    source: str,
+    time_units: str = "hours since 1970-01-01 00:00:00",
+    chunks: tuple | None = None,
+    **attrs,
+) -> Path:
     """Validate against the conventions and write Zarr (.zarr) or NetCDF (.nc)."""
     for c in ("time", "latitude", "longitude"):
         if c not in ds.coords:
@@ -282,7 +300,11 @@ def write_cube(ds: xr.Dataset, path: Path, *, title: str, source: str, **attrs) 
             **attrs,
         }
     )
-    enc = {"time": {"units": "hours since 1970-01-01 00:00:00", "calendar": "standard"}}
+    enc = {"time": {"units": time_units, "calendar": "standard"}}
+    if chunks is not None:
+        for name in ds.data_vars:
+            if ds[name].ndim == len(chunks):
+                enc[name] = {"chunks": tuple(min(c, n) for c, n in zip(chunks, ds[name].shape))}
     if "day" in ds.coords:
         enc["day"] = {"units": "days since 1970-01-01", "calendar": "standard"}
     path.parent.mkdir(parents=True, exist_ok=True)

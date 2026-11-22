@@ -166,6 +166,22 @@ def test_fire_pipeline(catalog, web, fake_herbie, fake_nfdrs4):
     txt = (cfg.outputs_dir / f"fire_{fid}_lfmc_check_summary.txt").read_text()
     assert "By site" in txt and "Mar-May" in txt
 
+    # Rothermel on the grid, per perimeter step
+    run("surface-spread", "--fire-id", str(fid))
+    sp = io.read_cube(cfg.fire_dir(fid) / "spread" / "rothermel_steps.zarr").load()
+    steps = io.read_table(cfg.outputs_dir / f"fire_{fid}_surface_spread_steps.csv", ["t_end_utc"])
+    nrec = len(io.read_table(cfg.fire_dir(fid) / "perimeters" / "obs_times.csv"))
+    assert sp.sizes["time"] == len(steps) == nrec - 1
+    ros = sp["ros_mean"].values
+    assert np.nanmin(ros) >= 0 and np.nanmax(ros) > 0
+    assert (sp["ros_max"].values >= np.nan_to_num(ros) - 1e-4)[np.isfinite(ros)].all()
+    assert pd.DatetimeIndex(sp["time"].values).equals(
+        pd.DatetimeIndex(steps["t_end_utc"].dt.tz_convert(None).dt.round("min"))
+    )
+    assert (steps["obs_p90_m_min"] > 0).all() and steps["pred_p90_m_min"].notna().all()
+    txt = (cfg.outputs_dir / f"fire_{fid}_surface_spread_summary.txt").read_text()
+    assert "MAPE" in txt and (cfg.outputs_dir / f"fire_{fid}_surface_spread.png").exists()
+
     # re-running weather is fully cached (no new HRRR requests)
     fakes.FakeHerbie.calls.clear()
     run("weather", "--fire-id", str(fid))
