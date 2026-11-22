@@ -134,3 +134,249 @@ stages:
       hash: md5
       md5: 79026c0c8da4532d40a787da27d8a2be
       size: 13838
+  stack@4299:
+    cmd: firespread stack --fire-id 4299
+    deps:
+    - path: data/processed/socal_perimeters.gpkg
+      hash: md5
+      md5: f56c685e8088539fd5d50e4187c10912
+      size: 16429056
+    - path: data/raw/landfire
+      hash: md5
+      md5: e9f62fbeb5f413d52d0ba6cbb9289b85.dir
+      size: 144422855
+      nfiles: 60
+    - path: src/firespread/io.py
+      hash: md5
+      md5: f082dae202fbaa0b7cdf34638a71d3f9
+      size: 12640
+    - path: src/firespread/stack.py
+      hash: md5
+      md5: 0739e448a11e5f25d8f7c057c058e885
+      size: 16499
+    params:
+      config/pipeline.yaml:
+        landfire_rules:
+        - max_year: 2017
+          version: LF2016_Remap
+        - max_year: 2020
+          version: LF2020
+        project:
+          crs: EPSG:32611
+          resolution_m: 30.0
+          snap_m: 750.0
+          buffer_m: 5000.0
+    outs:
+    - path: data/processed/fires/4299/grid.json
+      hash: md5
+      md5: 87106c57b45d4734ff30c9359c55856a
+      size: 464
+    - path: data/processed/fires/4299/perimeters
+      hash: md5
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      size: 93593
+      nfiles: 4
+    - path: data/processed/fires/4299/static
+      hash: md5
+      md5: 4fcc283b916660d67374e2d83573939b.dir
+      size: 62864412
+      nfiles: 8
+    - path: outputs/fire_4299_alignment.png
+      hash: md5
+      md5: a6930c4f37bfbfd02b352faec2d90334
+      size: 1706725
+    - path: outputs/fire_4299_stack_summary.txt
+      hash: md5
+      md5: 2e1c90c4575aa275ab99cd868f3b779e
+      size: 1952
+  weather@4299:
+    cmd: firespread weather --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/grid.json
+      hash: md5
+      md5: 87106c57b45d4734ff30c9359c55856a
+      size: 464
+    - path: data/processed/fires/4299/perimeters
+      hash: md5
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      size: 93593
+      nfiles: 4
+    - path: src/firespread/io.py
+      hash: md5
+      md5: f082dae202fbaa0b7cdf34638a71d3f9
+      size: 12640
+    - path: src/firespread/weather.py
+      hash: md5
+      md5: 1339e9ba1a633d67faf461ec5e896c4d
+      size: 20160
+    params:
+      config/pipeline.yaml:
+        fuel_moisture.spinup_days: 30.0
+        hrrr.lead_hours: 24
+        hrrr.margin_deg: 0.1
+    outs:
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      size: 35836735
+      nfiles: 175
+    - path: outputs/fire_4299_hrrr_summary.txt
+      hash: md5
+      md5: 4380cc647df9c6694db6a67b36c9ea9b
+      size: 1832
+    - path: outputs/fire_4299_hrrr_timeseries.png
+      hash: md5
+      md5: c800082ca2485ff08a50719799f757f9
+      size: 246198
+  stations@4299:
+    cmd: firespread stations --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/static
+      hash: md5
+      md5: 4fcc283b916660d67374e2d83573939b.dir
+      size: 62864412
+      nfiles: 8
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      size: 35836735
+      nfiles: 175
+    - path: src/firespread/stations.py
+      hash: md5
+      md5: 5ac6e47aabe8b69efa1fa66d3ff201e0
+      size: 27297
+    params:
+      config/pipeline.yaml:
+        stations:
+          match_tolerance_min: 30
+          min_wspd_for_dir: 2.0
+          max_cell_dist_km: 3.0
+          box_shrink_deg: 0.03
+          terrain_window_m: 3000
+          raws_network: '2'
+          offshore:
+            dir_min: 0.0
+            dir_max: 110.0
+            wspd_min: 5.0
+            rh_max: 25.0
+            cell_fraction: 0.2
+    outs:
+    - path: outputs/fire_4299_hrrr_station_metrics.csv
+      hash: md5
+      md5: a3695dfca2c3eaa8eb928acfc4140c47
+      size: 9660
+    - path: outputs/fire_4299_hrrr_station_pairs.csv
+      hash: md5
+      md5: 62ef2199289d01d8cedb97cdc91b0fe7
+      size: 361542
+    - path: outputs/fire_4299_hrrr_station_scatter.png
+      hash: md5
+      md5: 430d57db6c6f0fc9000b6900bde954ff
+      size: 315261
+    - path: outputs/fire_4299_hrrr_station_timeseries.png
+      hash: md5
+      md5: eb03ace78e62d94128f5f60dc260f1fd
+      size: 279685
+    - path: outputs/fire_4299_station_map.png
+      hash: md5
+      md5: 520027b33000ed36e00833c6bd4769b4
+      size: 372056
+    - path: outputs/fire_4299_stations.csv
+      hash: md5
+      md5: 008f10503592595b2346b7d80d5cea58
+      size: 558
+  fuel_moisture@4299:
+    cmd: firespread fuel-moisture --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/perimeters
+      hash: md5
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      size: 93593
+      nfiles: 4
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      size: 35836735
+      nfiles: 175
+    - path: src/firespread/fuel_moisture.py
+      hash: md5
+      md5: a2b678548313daea1c13f49364f22ea5
+      size: 14552
+    - path: src/firespread/gridmet.py
+      hash: md5
+      md5: c72dec76e327241c32a341c5ebdfe91f
+      size: 4344
+    params:
+      config/pipeline.yaml:
+        fuel_moisture.afternoon_utc_hour: 21
+        fuel_moisture.classes:
+        - 1
+        - 10
+        - 100
+        - 1000
+        fuel_moisture.gridmet_urls:
+        - https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc
+        - http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc
+        fuel_moisture.spinup_days: 30.0
+    outs:
+    - path: data/processed/fires/4299/fuel_moisture/dead_fuel_moisture.zarr
+      hash: md5
+      md5: 8f0755780aab31a6a4e69e0991655ef9.dir
+      size: 8488700
+      nfiles: 53
+    - path: outputs/fire_4299_fuel_moisture_map.png
+      hash: md5
+      md5: 1d8beddc1486fa5585fc4d3a3ff977ca
+      size: 129263
+    - path: outputs/fire_4299_fuel_moisture_summary.txt
+      hash: md5
+      md5: 1b875f41cedf41559cab86dc590e373c
+      size: 1633
+    - path: outputs/fire_4299_fuel_moisture_timeseries.png
+      hash: md5
+      md5: a7db6ff1908e5ee8037cb0af7baa59e1
+      size: 300817
+  live_fuel_moisture@4299:
+    cmd: firespread live-fuel-moisture --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/perimeters
+      hash: md5
+      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      size: 93593
+      nfiles: 4
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      size: 35836735
+      nfiles: 175
+    - path: src/firespread/gridmet.py
+      hash: md5
+      md5: c72dec76e327241c32a341c5ebdfe91f
+      size: 4344
+    - path: src/firespread/live_fuel_moisture.py
+      hash: md5
+      md5: b1f7aa5b68e37b2e65af34b924b03541
+      size: 10182
+    params:
+      config/pipeline.yaml:
+        fuel_moisture.gridmet_urls:
+        - https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc
+        - http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc
+        live_fuel_moisture:
+          spinup_days: 365
+          herbs_annual: true
+          obs_hour_utc: 21
+    outs:
+    - path: data/processed/fires/4299/fuel_moisture/live_fuel_moisture.zarr
+      hash: md5
+      md5: 013589ded5da0ec4718792ce5eab3215.dir
+      size: 1212146
+      nfiles: 36
+    - path: outputs/fire_4299_live_fuel_moisture_summary.txt
+      hash: md5
+      md5: 1a90f585da7c75941796e681f57e2ab8
+      size: 1335
+    - path: outputs/fire_4299_live_fuel_moisture_timeseries.png
+      hash: md5
+      md5: ba64745b305b3857eef896b8ddb83f4d
+      size: 128968

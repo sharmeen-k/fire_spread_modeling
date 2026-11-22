@@ -1,0 +1,6 @@
+outs:
+- md5: 40c500e9d169e5e8a007f05115b8c6ae.dir
+  size: 72494093
+  nfiles: 1
+  hash: md5
+  path: lfmc

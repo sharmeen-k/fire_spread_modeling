@@ -43,6 +43,7 @@ hrrr:
   lead_hours: 24             # analysis period starts this long before the first observation
   margin_deg: 0.1            # crop box margin around the fire grid
   priority: [aws, google]
+  workers: 6                 # parallel HRRR downloads (separate processes)
 
 stations:
   match_tolerance_min: 30
@@ -54,12 +55,18 @@ stations:
   offshore: {dir_min: 0.0, dir_max: 110.0, wspd_min: 5.0, rh_max: 25.0, cell_fraction: 0.20}
 
 fuel_moisture:
-  spinup_days: 7.0           # weather (and Nelson) start this long before the analysis period
+  spinup_days: 30.0          # weather (and Nelson) start this long before the first observation
+  fm100_source: nelson       # 100-h moisture for the spread model: nelson (hourly) or gridmet (daily)
   classes: [1, 10, 100, 1000]
   afternoon_utc_hour: 21     # ~13:00 PST, the time of day gridMET/NFDRS values represent
   gridmet_urls:
     - "https://www.reacchpna.org/thredds/ncss/grid/MET/{var}/{var}_{year}.nc"
     - "http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{var}/{var}_{year}.nc"
+
+live_fuel_moisture:          # NFDRS4 GSI model (herbaceous + woody), driven by gridMET daily weather
+  spinup_days: 365
+  herbs_annual: true
+  obs_hour_utc: 21
 
 publish:
   auth: pro                  # "pro" = ArcGIS Pro's signed-in session (works with UCR SSO)

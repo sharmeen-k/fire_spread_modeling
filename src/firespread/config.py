@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from datetime import date
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -63,6 +64,7 @@ class StudyCfg(_Model):
 class HrrrCfg(_Model):
     lead_hours: int = 24
     margin_deg: float = 0.1
+    workers: int = Field(default=6, ge=1, le=32)
     priority: list[str] = Field(default_factory=lambda: ["aws", "google"])
 
 
@@ -85,10 +87,17 @@ class StationsCfg(_Model):
 
 
 class FuelMoistureCfg(_Model):
-    spinup_days: float = 7.0
+    spinup_days: float = 30.0
+    fm100_source: Literal["nelson", "gridmet"] = "nelson"
     classes: list[int] = Field(default_factory=lambda: [1, 10, 100, 1000])
     afternoon_utc_hour: int = 21
     gridmet_urls: list[str]
+
+
+class LiveFuelMoistureCfg(_Model):
+    spinup_days: int = Field(default=365, ge=60)
+    herbs_annual: bool = True  # SoCal herbaceous fuels are mostly annual grasses
+    obs_hour_utc: int = 21  # NFDRS observation time, ~13:00 PST
 
 
 class PublishCfg(_Model):
@@ -108,6 +117,7 @@ class Config(_Model):
     hrrr: HrrrCfg = Field(default_factory=HrrrCfg)
     stations: StationsCfg = Field(default_factory=StationsCfg)
     fuel_moisture: FuelMoistureCfg
+    live_fuel_moisture: LiveFuelMoistureCfg = Field(default_factory=LiveFuelMoistureCfg)
     publish: PublishCfg = Field(default_factory=PublishCfg)
 
     # set by load(); not part of the YAML

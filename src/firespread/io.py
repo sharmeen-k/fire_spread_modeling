@@ -77,6 +77,9 @@ VARIABLES: dict[str, dict[str, str]] = {
     "fm1000": {"units": "%", "long_name": "1000-h dead fuel moisture (Nelson model, NFDRS4)"},
     "fm100_gridmet": {"units": "%", "long_name": "gridMET 100-h dead fuel moisture (daily)"},
     "fm1000_gridmet": {"units": "%", "long_name": "gridMET 1000-h dead fuel moisture (daily)"},
+    "lfm_herb": {"units": "%", "long_name": "live herbaceous fuel moisture (NFDRS4 GSI model)"},
+    "lfm_woody": {"units": "%", "long_name": "live woody fuel moisture (NFDRS4 GSI model)"},
+    "gsi": {"units": "1", "long_name": "Growing Season Index, 21-day running mean (NFDRS4)"},
 }
 
 COORD_ATTRS = {

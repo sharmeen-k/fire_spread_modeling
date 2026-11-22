@@ -1,23 +1,9 @@
 HRRR vs surface stations, fire 4299
 ==================================================
-HRRR file contents:
-  u10_grid     ('time', 'y', 'x')                  m/s grid-relative
-  v10_grid     ('time', 'y', 'x')                  m/s grid-relative
-  t2m          ('time', 'y', 'x')                  K
-  rh2          ('time', 'y', 'x')                  %
-  gust         ('time', 'y', 'x')                  m/s
-  u10_earth    ('time', 'y', 'x')                  m/s eastward
-  v10_earth    ('time', 'y', 'x')                  m/s northward
-  wspd10       ('time', 'y', 'x')                  m/s
-  wdir10       ('time', 'y', 'x')                  deg, direction wind blows FROM
-  t2m_c        ('time', 'y', 'x')                  degC
-  time axis 'time': 599 hours, 2017-12-04 09:00:00 to 2017-12-29 23:00:00 UTC
-  grid (33, 39), lat 33.918..34.996, lon -120.045..-118.594
-  using: u=u10_earth, v=v10_earth, wspd=wspd10, wdir=wdir10, gust=gust, rh=rh2, t2m_c=t2m_c, t2m_k=t2m
-
-Period 2017-12-04 08:00:00 to 2017-12-30 00:00:00 UTC; station box (-120.015, 33.948, -118.624, 34.966)
+HRRR cube: 599 unfilled hours in the analysis period, 2017-12-04 09:00:00 to 2017-12-29 23:00:00 UTC; grid (33, 39), lat 33.918..34.996, lon -120.045..-118.594
+Station box (-120.015, 33.948, -118.624, 34.966); reports matched within +/-30 min
 Offshore hours (>= 20% of HRRR cells with wind from 0-110 deg, >= 5.0 m/s, RH <= 25.0%): 182 of 599
-Bias = HRRR - station. Wind direction compared only when both speeds >= 2.0 m/s.
+Bias = HRRR - station. Direction compared only when both speeds >= 2.0 m/s.
 
 Stations
 --------------------------------------------------
@@ -36,7 +22,7 @@ network variable units    n  obs_mean  hrrr_mean  bias   mae  rmse    r
    ASOS       rh     % 2298     42.89      39.74 -3.15 11.31 15.64 0.82
    ASOS      t2m     C 2298     14.30      14.11 -0.19  2.44  3.44 0.84
 
-Network totals by regime: wind speed and RH
+Network totals by regime: wind speed, gust and RH
 --------------------------------------------------
 network   regime variable    n  bias  rmse
    ASOS      all     wspd 2296 -0.71  2.17
@@ -57,14 +43,10 @@ network stid  dem_elev_m  rel_elev_3km_m   n  obs_mean  hrrr_mean  bias  rmse
    ASOS  SBA        2.94           -3.44 599      1.22       1.49  0.27  1.48
    ASOS  CMA       20.61           -4.38 507      4.91       3.35 -1.56  3.02
 
-Correlation of station wind bias with relative elevation (n=4 stations): r = 0.05
-Negative r means HRRR under-predicts wind more at ridge-like stations.
+Correlation of station wind bias with relative elevation (n=4): r = 0.05 (negative = HRRR under-predicts more at ridge-like stations)
 
 Notes
-- ASOS: 10 m, 2-min mean wind; gusts reported only when gusty, so gust stats
-  cover gusty hours only. RAWS: ~6.1 m (20 ft), 10-min mean wind, hourly peak gust.
-  RAWS winds are therefore expected to read lower than a true 10 m wind.
-- HRRR value is the nearest 3 km cell (no interpolation).
-- rel_elev_3km_m = station DEM height minus the mean DEM height in a 3 km
-  window (~one HRRR cell); > 0 ridge-like, < 0 valley-like.
-  terrain_src: grid = fire-grid DEM (script 07); 3dep = window fetched from USGS 3DEP.
+- ASOS: 10 m, 2-min mean wind; gusts only reported when gusty, so gust stats cover gusty hours only.
+  RAWS: ~6.1 m (20 ft), 10-min mean wind, hourly peak gust; expected to read lower than 10 m wind.
+- HRRR value is the nearest 3 km cell; gap-filled HRRR hours are excluded.
+- rel_elev_3km_m = station DEM height minus mean DEM height in a 3 km window; > 0 ridge-like.
