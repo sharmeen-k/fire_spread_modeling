@@ -29,6 +29,7 @@ dependencies = [
     # USDA Forest Service Missoula Fire Sciences Lab NFDRS4 (Nelson dead fuel
     # moisture, GSI live fuel moisture). Built from source: needs a C++ compiler.
     "nfdrs4 @ git+https://github.com/firelab/NFDRS4@b0e72b6f4b5d0fb7fc83e01e25405cd8165a2552",
+    "openpyxl>=3.1.5",
 ]
 
 [project.optional-dependencies]
