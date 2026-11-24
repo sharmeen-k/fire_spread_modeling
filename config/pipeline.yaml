@@ -19,7 +19,7 @@ inputs:                      # manually obtained source files (tracked with `dvc
 
 landfire_rules:              # first rule whose max_year >= fire year wins
   - {max_year: 2017, version: LF2016_Remap}
-  - {max_year: 2020, version: LF2020}
+  - {max_year: 2020, version: LF2016_Remap}  # pre-fire fuels for 2018-2020 fires; LF2020 contains their burn scars
 
 study:
   counties: [Imperial, Kern, Los Angeles, Orange, Riverside, San Bernardino,
