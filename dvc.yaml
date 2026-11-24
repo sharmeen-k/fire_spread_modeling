@@ -196,3 +196,24 @@ stages:
         - outputs/fire_${item}_surface_spread.png: {cache: false}
       metrics:
         - outputs/fire_${item}_surface_spread_summary.txt: {cache: false}
+
+  samples:
+    foreach: ${fires}
+    do:
+      cmd: firespread build-samples --fire-id ${item}
+      deps:
+        - data/processed/fires/${item}/static
+        - data/processed/fires/${item}/weather/hrrr_hourly.zarr
+        - data/processed/fires/${item}/fuel_moisture/dead_fuel_moisture.zarr
+        - data/processed/fires/${item}/fuel_moisture/live_fuel_moisture.zarr
+        - src/firespread/samples.py
+        - src/firespread/rothermel.py
+        - src/firespread/surface_spread.py
+      params:
+        - config/pipeline.yaml:
+            - samples
+            - fuel_moisture.fm100_source
+      outs:
+        - data/processed/fires/${item}/samples/samples.zarr
+      metrics:
+        - outputs/fire_${item}_samples_summary.txt: {cache: false}

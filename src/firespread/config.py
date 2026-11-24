@@ -114,6 +114,13 @@ class SurfaceSpreadCfg(_Model):
     wind_limit: bool = False  # behave default
 
 
+class SamplesCfg(_Model):
+    block: int = Field(default=12, ge=1)  # 30 m cells per ML block side (12 -> 360 m)
+    buffer_m: float = Field(default=6000.0, ge=0)  # window = final extent + buffer
+    rothermel_hours: int = Field(default=3, ge=1)  # run Rothermel every n-th hour of a step
+    rothermel_stride: int = Field(default=3, ge=1)  # ... on every n-th 30 m cell (3 -> 90 m)
+
+
 class PublishCfg(_Model):
     auth: str = "pro"
     portal_url: str | None = None
@@ -134,6 +141,7 @@ class Config(_Model):
     live_fuel_moisture: LiveFuelMoistureCfg = Field(default_factory=LiveFuelMoistureCfg)
     lfmc_validation: LfmcValidationCfg = Field(default_factory=LfmcValidationCfg)
     surface_spread: SurfaceSpreadCfg = Field(default_factory=SurfaceSpreadCfg)
+    samples: SamplesCfg = Field(default_factory=SamplesCfg)
     publish: PublishCfg = Field(default_factory=PublishCfg)
 
     # set by load(); not part of the YAML

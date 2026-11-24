@@ -80,6 +80,12 @@ surface_spread:              # Rothermel (behave port) on the fire grid, per per
   min_new_cells: 150          # steps with less new area are not scored
   wind_limit: false           # behave default
 
+samples:                     # ML training samples, one per 12-h perimeter step
+  block: 12                   # 30 m cells per block -> 360 m ML grid (~VIIRS 375 m)
+  buffer_m: 6000              # window = final fire extent + this
+  rothermel_hours: 3          # Rothermel every 3rd hour of a step ...
+  rothermel_stride: 3         # ... on every 3rd 30 m cell (90 m)
+
 publish:
   auth: pro                  # "pro" = ArcGIS Pro's signed-in session (works with UCR SSO)
   portal_url: null           # used with auth: oauth

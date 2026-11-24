@@ -28,6 +28,7 @@ import rasterio.features
 import shapely
 import xarray as xr
 from pyproj import CRS, Transformer
+from rasterio.transform import from_origin
 
 from . import gridmet, io, logs, rothermel
 from .config import Config
@@ -50,6 +51,12 @@ def window(mask: np.ndarray, pad: int) -> tuple[slice, slice]:
     return (
         slice(max(ys.min() - pad, 0), min(ys.max() + pad + 1, h)),
         slice(max(xs.min() - pad, 0), min(xs.max() + pad + 1, w)),
+    )
+
+
+def window_transform(grid: io.Grid, win: tuple[slice, slice]):
+    return from_origin(
+        grid.bounds[0] + win[1].start * grid.res, grid.bounds[3] - win[0].start * grid.res, grid.res, grid.res
     )
 
 
@@ -141,7 +148,7 @@ def error_stats(obs, pred) -> dict:
 class SpreadInputs:
     """Surface fire inputs for the cells of a grid window, at any hour of the weather cube."""
 
-    def __init__(self, cfg: Config, fire_id: int, win: tuple[slice, slice]):
+    def __init__(self, cfg: Config, fire_id: int, win: tuple[slice, slice], stride: int = 1):
         fdir = cfg.fire_dir(fire_id)
         self.grid = io.Grid.from_json(fdir / "grid.json")
         self.win = win
@@ -153,6 +160,10 @@ class SpreadInputs:
         table = rothermel.fuel_table()
         self.shape = fb.shape
         self.cells = table.burnable(fb) & np.isfinite(slope)  # cells where spread is computed
+        if stride > 1:  # every stride-th cell in both directions (coarser sampling for training features)
+            sub = np.zeros_like(self.cells)
+            sub[stride // 2 :: stride, stride // 2 :: stride] = True
+            self.cells &= sub
         sel = self.cells
         self.fm = fb[sel]
         self.slope = np.nan_to_num(slope[sel])
@@ -261,7 +272,7 @@ def run(cfg: Config, fire_id: int) -> None:
     win = window(union > 0, int(sc.roi_buffer_m / grid.res))
     inp = SpreadInputs(cfg, fire_id, win)
     h, w = inp.shape
-    tr = grid.transform * grid.transform.translation(win[1].start, win[0].start)
+    tr = window_transform(grid, win)
     log_.info(
         "Window %d x %d cells (%d burnable) around fire %d; fm100 source %s",
         w,

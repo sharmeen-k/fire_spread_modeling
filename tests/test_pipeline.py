@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 
 from firespread import cli, io, manifest
 from firespread.fuel_moisture import cube_path as fm_path
@@ -181,6 +182,23 @@ def test_fire_pipeline(catalog, web, fake_herbie, fake_nfdrs4):
     assert (steps["obs_p90_m_min"] > 0).all() and steps["pred_p90_m_min"].notna().all()
     txt = (cfg.outputs_dir / f"fire_{fid}_surface_spread_summary.txt").read_text()
     assert "MAPE" in txt and (cfg.outputs_dir / f"fire_{fid}_surface_spread.png").exists()
+
+    # training samples
+    run("build-samples", "--fire-id", str(fid))
+    from firespread import samples as S
+
+    sm = xr.open_zarr(S.out_path(cfg, fid), zarr_format=3, consolidated=False).load()
+    assert sm.sizes["sample"] == nrec - 1 and list(sm["channel"].values) == S.CHANNELS
+    v = sm["valid"].values
+    x, y = sm["inputs"].values[:, :, v], sm["target"].values[:, v]
+    bt = x[:, S.CHANNELS.index("burned_t")]
+    assert np.nanmin(y) >= 0 and np.nanmax(y) <= 1 and (y >= bt - 1e-6).all()  # cumulative perimeters
+    assert np.allclose(bt[1:], y[:-1])  # target of step k = burned_t of step k+1
+    assert np.isfinite(x).all() and np.nanmax(x[:, S.CHANNELS.index("ros_mean")]) > 0
+    fuels = (
+        x[:, [S.CHANNELS.index(f"fuel_{g}") for g in S.FUEL_GROUPS]].sum(1) + x[:, S.CHANNELS.index("nodata")]
+    )
+    assert np.allclose(fuels, 1, atol=1e-5)
 
     # re-running weather is fully cached (no new HRRR requests)
     fakes.FakeHerbie.calls.clear()
