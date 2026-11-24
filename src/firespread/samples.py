@@ -170,6 +170,11 @@ def run(cfg: Config, fire_id: int) -> None:
 
     # Rothermel on a sub-sampled set of 30 m cells of the (in-grid part of the) window
     spread = SpreadInputs(cfg, fire_id, inside, stride=sc.rothermel_stride)
+    if not spread.cells.any():
+        raise RuntimeError(
+            f"fire {fire_id}: no burnable cells with fuel data; re-run `stack` with LANDFIRE "
+            "files that cover this fire"
+        )
 
     def raster(geom):
         m = rasterio.features.rasterize([(geom, 1)], out_shape=(H, W), transform=tr, dtype="uint8")

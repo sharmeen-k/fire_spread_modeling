@@ -398,6 +398,12 @@ def run(cfg: Config, fire_id: int, landfire_dir: Path | None = None) -> None:
             if key == "fbfm40":
                 fb = arr
         inside = fb[mu == 1]
+        missing_share = float((inside == LF_NODATA).mean()) if inside.size else 1.0
+        if missing_share > 0.5:
+            raise RuntimeError(
+                f"LANDFIRE has no data for {missing_share:.0%} of fire {fire_id}'s burned area; the files in "
+                f"{lf_dir} do not cover this fire (a clip for another area?). Use full-extent CONUS files."
+            )
         inside = inside[inside != LF_NODATA]
         vals, cnts = np.unique(inside, return_counts=True)
         top = sorted(zip(cnts, vals), reverse=True)[:10]
