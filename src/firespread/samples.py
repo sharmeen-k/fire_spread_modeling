@@ -34,6 +34,7 @@ import xarray as xr
 from pyproj import CRS, Transformer
 
 from . import gridmet, io, logs
+from .channels import CHANNELS, FUEL_GROUPS, MOISTURE, PHYSICS, STATIC, STEP, WEATHER  # noqa: F401
 from .config import Config
 from .fuel_moisture import surface_dead_moisture
 from .live_fuel_moisture import cube_path as live_path
@@ -50,33 +51,6 @@ from .surface_spread import (
 from .weather import cube_path as weather_path
 
 log = logging.getLogger(__name__)
-
-FUEL_GROUPS = {
-    "NB": (91, 99),
-    "GR": (101, 109),
-    "GS": (121, 124),
-    "SH": (141, 149),
-    "TU": (161, 165),
-    "TL": (181, 189),
-    "SB": (201, 204),
-}
-STATIC = [
-    "elevation",
-    "slope",
-    "aspect_sin",
-    "aspect_cos",
-    *[f"fuel_{g}" for g in FUEL_GROUPS],
-    "cc",
-    "ch",
-    "cbh",
-    "cbd",
-    "nodata",
-]
-WEATHER = ["u10_mean", "v10_mean", "wspd_max", "gust_max", "t2m_mean", "rh_min", "rain_sum"]
-MOISTURE = ["fm1_mean", "fm10_mean", "fm100_mean", "lfm_herb", "lfm_woody"]
-PHYSICS = ["ros_mean", "ros_x", "ros_y", "ros_blockmax", "fli_mean"]
-STEP = ["hours_since_start", "step_hours", "local_hour"]
-CHANNELS = ["burned_t", *STATIC, *WEATHER, *MOISTURE, *PHYSICS, *STEP]
 
 
 def out_path(cfg: Config, fire_id: int):

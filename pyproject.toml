@@ -35,6 +35,8 @@ dependencies = [
 [project.optional-dependencies]
 # ArcGIS publishing runs in ArcGIS Pro's Python (arcgispro-py3), which ships arcgis.
 publish = ["arcgis>=2.4"]
+# Model training (Colab A100 / local GPU): pip install "firespread[ml]"
+ml = ["torch>=2.3"]
 
 [dependency-groups]
 dev = ["pytest>=8.3", "ruff>=0.8", "pre-commit>=4.0", "dvc>=3.55"]
