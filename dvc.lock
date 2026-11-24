@@ -41,12 +41,12 @@ stages:
       size: 2597712
     - path: src/firespread/catalog.py
       hash: md5
-      md5: 0f54b754880dda33cb437f885242b713
-      size: 7828
+      md5: b57b4ef052665ed6b282f26caac2808c
+      size: 7641
     - path: src/firespread/perimeters.py
       hash: md5
-      md5: ea322fa85360ea9aa9aa197eb092a9e5
-      size: 2521
+      md5: e36c4c75b1f4dfce315b47053151051d
+      size: 2461
     params:
       config/pipeline.yaml:
         study.counties:
@@ -64,7 +64,7 @@ stages:
     outs:
     - path: data/processed/socal_perimeters.gpkg
       hash: md5
-      md5: f56c685e8088539fd5d50e4187c10912
+      md5: bb3cb2c7d48c4bb5886db4c6fff49522
       size: 16429056
     - path: outputs/socal_fires.csv
       hash: md5
@@ -139,7 +139,7 @@ stages:
     deps:
     - path: data/processed/socal_perimeters.gpkg
       hash: md5
-      md5: f56c685e8088539fd5d50e4187c10912
+      md5: bb3cb2c7d48c4bb5886db4c6fff49522
       size: 16429056
     - path: data/raw/landfire
       hash: md5
@@ -148,12 +148,12 @@ stages:
       nfiles: 60
     - path: src/firespread/io.py
       hash: md5
-      md5: f082dae202fbaa0b7cdf34638a71d3f9
-      size: 12640
+      md5: 1c4720d2eeb0da8551fcd490fc05d6ea
+      size: 13317
     - path: src/firespread/stack.py
       hash: md5
-      md5: 0739e448a11e5f25d8f7c057c058e885
-      size: 16499
+      md5: ca96b2f42bc0426e68b88006e7d5e928
+      size: 16084
     params:
       config/pipeline.yaml:
         landfire_rules:
@@ -173,12 +173,12 @@ stages:
       size: 464
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      md5: f23e408d0689a699fb6b5e4d58169744.dir
       size: 93593
       nfiles: 4
     - path: data/processed/fires/4299/static
       hash: md5
-      md5: 4fcc283b916660d67374e2d83573939b.dir
+      md5: 7b01bc09a9405c09dbc6eeef8a51ea6f.dir
       size: 62864412
       nfiles: 8
     - path: outputs/fire_4299_alignment.png
@@ -198,13 +198,13 @@ stages:
       size: 464
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      md5: f23e408d0689a699fb6b5e4d58169744.dir
       size: 93593
       nfiles: 4
     - path: src/firespread/io.py
       hash: md5
-      md5: f082dae202fbaa0b7cdf34638a71d3f9
-      size: 12640
+      md5: 1c4720d2eeb0da8551fcd490fc05d6ea
+      size: 13317
     - path: src/firespread/weather.py
       hash: md5
       md5: 1339e9ba1a633d67faf461ec5e896c4d
@@ -217,7 +217,7 @@ stages:
     outs:
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      md5: 94e964fc8084c8dd03081ab0fed2a329.dir
       size: 35836735
       nfiles: 175
     - path: outputs/fire_4299_hrrr_summary.txt
@@ -290,12 +290,12 @@ stages:
     deps:
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      md5: f23e408d0689a699fb6b5e4d58169744.dir
       size: 93593
       nfiles: 4
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      md5: 94e964fc8084c8dd03081ab0fed2a329.dir
       size: 35836735
       nfiles: 175
     - path: src/firespread/fuel_moisture.py
@@ -321,7 +321,7 @@ stages:
     outs:
     - path: data/processed/fires/4299/fuel_moisture/dead_fuel_moisture.zarr
       hash: md5
-      md5: 8f0755780aab31a6a4e69e0991655ef9.dir
+      md5: 6007fca2cff5a13e17c89283dea3845d.dir
       size: 8488700
       nfiles: 53
     - path: outputs/fire_4299_fuel_moisture_map.png
@@ -341,12 +341,12 @@ stages:
     deps:
     - path: data/processed/fires/4299/perimeters
       hash: md5
-      md5: fb517bb5368e4a0a4e65ba77516228fc.dir
+      md5: f23e408d0689a699fb6b5e4d58169744.dir
       size: 93593
       nfiles: 4
     - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
       hash: md5
-      md5: 721519d3f1bd0e343d4c78b53b087cd4.dir
+      md5: 94e964fc8084c8dd03081ab0fed2a329.dir
       size: 35836735
       nfiles: 175
     - path: src/firespread/gridmet.py
@@ -369,7 +369,7 @@ stages:
     outs:
     - path: data/processed/fires/4299/fuel_moisture/live_fuel_moisture.zarr
       hash: md5
-      md5: 013589ded5da0ec4718792ce5eab3215.dir
+      md5: 6bbc6a632b7a179a990df1f89c2cc036.dir
       size: 1212146
       nfiles: 36
     - path: outputs/fire_4299_live_fuel_moisture_summary.txt
@@ -380,3 +380,102 @@ stages:
       hash: md5
       md5: ba64745b305b3857eef896b8ddb83f4d
       size: 128968
+  lfmc_check@4299:
+    cmd: firespread lfmc-check --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/fuel_moisture/live_fuel_moisture.zarr
+      hash: md5
+      md5: efb5695f9e02793c34570c7670fbe5b8.dir
+      size: 1212146
+      nfiles: 36
+    - path: data/raw/lfmc
+      hash: md5
+      md5: 40c500e9d169e5e8a007f05115b8c6ae.dir
+      size: 72494093
+      nfiles: 1
+    - path: src/firespread/lfmc_check.py
+      hash: md5
+      md5: a691c7995ed6537ed1387ee7127f788f
+      size: 9433
+    params:
+      config/pipeline.yaml:
+        lfmc_validation:
+          file: data/raw/lfmc/Globe-LFMC-2.0 final.xlsx
+          species:
+          - Adenostoma fasciculatum
+          radius_km: 60
+          near_fire_days: 60
+    outs:
+    - path: outputs/fire_4299_lfmc_check.csv
+      hash: md5
+      md5: d7b5939c5ae4cbe8b9c9c44ea2b6697b
+      size: 56980
+    - path: outputs/fire_4299_lfmc_check.png
+      hash: md5
+      md5: 7cc1bed26169c423d0255653eb21a3dd
+      size: 242558
+    - path: outputs/fire_4299_lfmc_check_summary.txt
+      hash: md5
+      md5: b32b4314a0c4442c558fcd82209d01b5
+      size: 8800
+  surface_spread@4299:
+    cmd: firespread surface-spread --fire-id 4299
+    deps:
+    - path: data/processed/fires/4299/fuel_moisture/dead_fuel_moisture.zarr
+      hash: md5
+      md5: 6007fca2cff5a13e17c89283dea3845d.dir
+      size: 8488700
+      nfiles: 53
+    - path: data/processed/fires/4299/fuel_moisture/live_fuel_moisture.zarr
+      hash: md5
+      md5: 6bbc6a632b7a179a990df1f89c2cc036.dir
+      size: 1212146
+      nfiles: 36
+    - path: data/processed/fires/4299/static
+      hash: md5
+      md5: 7b01bc09a9405c09dbc6eeef8a51ea6f.dir
+      size: 62864412
+      nfiles: 8
+    - path: data/processed/fires/4299/weather/hrrr_hourly.zarr
+      hash: md5
+      md5: 94e964fc8084c8dd03081ab0fed2a329.dir
+      size: 35836735
+      nfiles: 175
+    - path: src/firespread/data/fuel_models.csv
+      hash: md5
+      md5: 4758046afa11c221e22442ef81cfd9cd
+      size: 13986
+    - path: src/firespread/rothermel.py
+      hash: md5
+      md5: 4fac7faaa106a0b1d44c3224263941e9
+      size: 17720
+    - path: src/firespread/surface_spread.py
+      hash: md5
+      md5: 7547e9b4fa440e72dedd4bd081f3bb21
+      size: 20142
+    params:
+      config/pipeline.yaml:
+        fuel_moisture.fm100_source: nelson
+        surface_spread:
+          roi_buffer_m: 3000
+          hour_stride: 1
+          min_new_cells: 150
+          wind_limit: false
+    outs:
+    - path: data/processed/fires/4299/spread/rothermel_steps.zarr
+      hash: md5
+      md5: d434883551131a5a80a66854fba40fe1.dir
+      size: 1683436625
+      nfiles: 2624
+    - path: outputs/fire_4299_surface_spread.png
+      hash: md5
+      md5: 39a90e3dc63ba1af4b2caa52e6f34e32
+      size: 904050
+    - path: outputs/fire_4299_surface_spread_steps.csv
+      hash: md5
+      md5: b82a213ed2eeb0c5ae970cf6cc460374
+      size: 6777
+    - path: outputs/fire_4299_surface_spread_summary.txt
+      hash: md5
+      md5: dd8e5e1f5ea039b262ca8fbce526e6d0
+      size: 7940
