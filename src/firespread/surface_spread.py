@@ -109,10 +109,22 @@ def nearest_land_index(land: np.ndarray):
     return ly[k], lx[k]
 
 
-def fill(field: np.ndarray, nearest) -> np.ndarray:
-    if nearest is None:
+_NEAREST_CACHE: dict = {}
+
+
+def fill(field: np.ndarray, nearest=None) -> np.ndarray:
+    """Fill ocean cells from the nearest land cell, then any remaining gap from the nearest valid cell."""
+    if nearest is not None:
+        field = np.where(np.isfinite(field), field, field[nearest])
+    ok = np.isfinite(field)
+    if ok.all() or not ok.any():
         return field
-    return np.where(np.isfinite(field), field, field[nearest])
+    key = (ok.shape, ok.tobytes())
+    if key not in _NEAREST_CACHE:
+        if len(_NEAREST_CACHE) > 64:
+            _NEAREST_CACHE.clear()
+        _NEAREST_CACHE[key] = nearest_land_index(ok)
+    return np.where(ok, field, field[_NEAREST_CACHE[key]])
 
 
 def error_stats(obs, pred) -> dict:

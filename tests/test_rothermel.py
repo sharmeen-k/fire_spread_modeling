@@ -175,5 +175,9 @@ def test_grid_helpers():
     land = np.array([[True, False], [False, False]])
     v = np.where(land, 7.0, np.nan)
     assert np.all(S.fill(v, S.nearest_land_index(land)) == 7.0)
+    # gaps over land (e.g. live moisture without a gridMET cell) come from the nearest valid cell
+    w = np.array([[1.0, np.nan, np.nan], [2.0, 3.0, np.nan]])
+    f = S.fill(w, S.nearest_land_index(np.ones((2, 3), bool)))
+    assert np.isfinite(f).all() and f[0, 1] in (1.0, 3.0) and f[1, 2] == 3.0
     st = S.error_stats([1, 2, 4], [2, 2, 2])
     assert st["n"] == 3 and st["within_2x"] == 100 and st["under"] == pytest.approx(100 / 3)

@@ -200,6 +200,13 @@ def test_fire_pipeline(catalog, web, fake_herbie, fake_nfdrs4):
     )
     assert np.allclose(fuels, 1, atol=1e-5)
 
+    # validation report: the processed fire has no problems
+    from firespread import validate
+
+    probs = validate.run(cfg)
+    assert not [p for p in probs if p.startswith(f"{fid}:")], probs
+    assert (cfg.outputs_dir / "validation_report.json").exists()
+
     # re-running weather is fully cached (no new HRRR requests)
     fakes.FakeHerbie.calls.clear()
     run("weather", "--fire-id", str(fid))

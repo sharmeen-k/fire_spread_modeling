@@ -52,6 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("socal", help="filter Largefire to the Southern California study area")
     sub.add_parser("test-fires", help="match FRAP named fires to Largefire fire IDs")
     sub.add_parser("split", help="train/val/test split by fire")
+    sub.add_parser("validate", help="check every fire's outputs; writes outputs/validation_report.json")
 
     def fire_parser(name, help_):
         p = sub.add_parser(name, help=help_)
@@ -108,6 +109,11 @@ def main(argv: list[str] | None = None) -> int:
             from .split import make_split
 
             make_split(cfg)
+        elif args.cmd == "validate":
+            from . import validate
+
+            problems = validate.run(cfg)
+            return 1 if problems else 0
         elif args.cmd == "publish":
             from . import publish
 

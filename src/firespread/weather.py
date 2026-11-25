@@ -385,6 +385,13 @@ def run(cfg: Config, fire_id: int, max_hours: int | None = None, retry_missing: 
         )
     if not got["f00"] or not got["f01"]:
         raise RuntimeError("No HRRR hours available; check the network and re-run")
+    miss = 1 - len(got["f00"]) / len(hours)
+    if miss > cfg.hrrr.max_missing_share:
+        raise RuntimeError(
+            f"{miss:.0%} of HRRR analysis hours are missing (limit {cfg.hrrr.max_missing_share:.0%}). This is usually "
+            "a network or throttling problem during download, not the archive: re-run with --retry-missing "
+            "(fewer workers helps). Raise hrrr.max_missing_share only if the archive really lacks the hours."
+        )
 
     a00, lat, lon, attrs = _stack(got["f00"], hours, F00_NEEDED)
     a01, _, _, _ = _stack(got["f01"], hours, ["dswrf", "apcp"])
@@ -398,7 +405,15 @@ def run(cfg: Config, fire_id: int, max_hours: int | None = None, retry_missing: 
     apcp = np.clip(_fill(a01["apcp"], hours, zero=True), 0.0, None)
     qc00 = np.array([t not in got["f00"] for t in hours], dtype="int8")
     qc01 = np.array([t not in got["f01"] for t in hours], dtype="int8")
-    land = cache.land(hours[0])
+    land = None
+    for t in sorted(got["f00"])[:: max(1, len(got["f00"]) // 5)][
+        :6
+    ]:  # the land mask comes from any archived hour
+        land = cache.land(t)
+        if land is not None:
+            break
+    if land is None:
+        raise RuntimeError("Could not download the HRRR land mask; check the network and re-run")
 
     xs, ys = io.hrrr_projected_xy(lat, lon)
     tr = Transformer.from_crs("EPSG:4326", grid.crs, always_xy=True)

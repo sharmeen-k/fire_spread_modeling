@@ -65,6 +65,7 @@ filterwarnings = ["ignore::DeprecationWarning:herbie.*"]
 line-length = 110
 target-version = "py312"
 src = ["src", "tests"]
+extend-exclude = ["outputs"]   # ad-hoc check scripts
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "NPY", "PD002", "RUF"]

@@ -42,7 +42,8 @@ fires: [4299]                # fires the per-fire pipeline runs on (dvc.yaml for
 hrrr:
   lead_hours: 24             # analysis period starts this long before the first observation
   margin_deg: 0.1            # crop box margin around the fire grid
-  priority: [aws, google]
+  priority: [aws, google, azure, pando]   # archives tried in order
+  max_missing_share: 0.2      # stop (instead of gap-filling) if more hours than this are missing
   workers: 6                 # parallel HRRR downloads (separate processes)
 
 stations:

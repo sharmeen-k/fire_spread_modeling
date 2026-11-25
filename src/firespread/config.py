@@ -65,7 +65,8 @@ class HrrrCfg(_Model):
     lead_hours: int = 24
     margin_deg: float = 0.1
     workers: int = Field(default=6, ge=1, le=32)
-    priority: list[str] = Field(default_factory=lambda: ["aws", "google"])
+    priority: list[str] = Field(default_factory=lambda: ["aws", "google", "azure", "pando"])
+    max_missing_share: float = Field(default=0.2, ge=0, le=1)  # stop if more analysis hours are missing
 
 
 class OffshoreCfg(_Model):
